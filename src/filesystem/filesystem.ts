@@ -8,8 +8,9 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { basename, extname } from 'node:path';
+import { encodeError } from 'error-message-utils';
 import { IPathElement } from './types.js';
-
+import { ERRORS } from './filesystem.errors.js';
 
 /* ************************************************************************************************
  *                                        GENERAL ACTIONS                                         *
@@ -35,7 +36,7 @@ const pathExists = (path: string): boolean => {
  * @param path
  * @returns IPathElement | null
  */
-const readPathItem = (path: string): IPathElement | null => {
+const readPathElement = (path: string): IPathElement | null => {
   try {
     const item: Stats = lstatSync(path);
     return {
@@ -67,27 +68,38 @@ const readPathItem = (path: string): IPathElement | null => {
  * @returns boolean
  */
 const isDirectory = (path: string, allowSymbolicLink: boolean = true): boolean => {
-  // retrieve the item
-  const item = readPathItem(path);
-  if (item) {
-    return item.isDirectory && (
-      !item.isSymbolicLink || (item.isSymbolicLink && allowSymbolicLink)
+  const el = readPathElement(path);
+  if (el) {
+    return el.isDirectory && (
+      !el.isSymbolicLink || (el.isSymbolicLink && allowSymbolicLink)
     );
   }
   return false;
 };
 
 /**
- * Creates a directory at a given path.
- * @param path
- */
-const createDirectory = (path: string): void => mkdirSync(path);
-
-/**
  * Deletes the directory located in the given path.
  * @param path
  */
 const deleteDirectory = (path: string): void => rmSync(path, { recursive: true, force: true });
+
+/**
+ * Creates a directory at a given path. Note that if the directory already exists and
+ * deleteIfExists is falsy, it will throw the DIRECTORY_ALREADY_EXISTS error.
+ * @param path
+ * @param deleteIfExists?
+ */
+const createDirectory = (path: string, deleteIfExists?: boolean): void => {
+  // check if the dir already exists and if it should be deleted
+  if (isDirectory(path)) {
+    if (deleteIfExists) {
+      deleteDirectory(path);
+    } else {
+      throw new Error(encodeError(`The directory ${path} already exists.`, ERRORS.DIRECTORY_ALREADY_EXISTS));
+    }
+  }
+  mkdirSync(path);
+};
 
 
 
@@ -118,7 +130,7 @@ const writeTextFile = (path: string, data: string): void => writeFileSync(
 export {
   // general actions
   pathExists,
-  readPathItem,
+  readPathElement,
 
   // directory actions
   isDirectory,

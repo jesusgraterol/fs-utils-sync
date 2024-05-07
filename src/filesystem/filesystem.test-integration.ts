@@ -2,7 +2,7 @@ import {
   deleteDirectory,
   pathExists,
   createDirectory,
-  readPathItem,
+  readPathElement,
   writeTextFile,
 } from './filesystem.js';
 
@@ -22,7 +22,7 @@ const BASE_PATH = 'fs-test-dir';
  ************************************************************************************************ */
 
 // builds a path inside of the base path
-const __p = (path?: string): string => (typeof path === 'string' ? `${BASE_PATH}/${path}` : BASE_PATH);
+const p = (path?: string): string => (typeof path === 'string' ? `${BASE_PATH}/${path}` : BASE_PATH);
 
 
 
@@ -34,9 +34,9 @@ const __p = (path?: string): string => (typeof path === 'string' ? `${BASE_PATH}
 describe('Filesystem', () => {
   beforeAll(() => { });
 
-  afterAll(() => { deleteDirectory(__p()); });
+  afterAll(() => { deleteDirectory(p()); });
 
-  beforeEach(() => { deleteDirectory(__p()); });
+  beforeEach(() => { deleteDirectory(p()); });
 
   afterEach(() => { });
 
@@ -53,46 +53,46 @@ describe('Filesystem', () => {
     afterEach(() => { });
 
     test('can determine if a path does not exist', () => {
-      expect(pathExists(__p())).toBeFalsy();
+      expect(pathExists(p())).toBeFalsy();
     });
 
     test('can determine if a path exists', () => {
-      createDirectory(__p());
-      expect(pathExists(__p())).toBeTruthy();
+      createDirectory(p());
+      expect(pathExists(p())).toBeTruthy();
     });
 
     test('returns null when a path item does not exist', () => {
-      expect(readPathItem(__p())).toBeNull();
-      expect(readPathItem(__p('test-file.txt'))).toBeNull();
+      expect(readPathElement(p())).toBeNull();
+      expect(readPathElement(p('test-file.txt'))).toBeNull();
     });
 
     test('can read a directory\'s item', () => {
-      createDirectory(__p());
-      const item = readPathItem(__p());
-      expect(item).not.toBeNull();
-      expect(item!.baseName).toBe(__p());
-      expect(item!.path).toBe(__p());
-      expect(typeof item!.creation).toBe('number');
-      expect(item!.extName).toBe('');
-      expect(item!.isDirectory).toBeTruthy();
-      expect(item!.isFile).toBeFalsy();
-      expect(item!.isSymbolicLink).toBeFalsy();
-      expect(typeof item!.size).toBe('number');
+      createDirectory(p());
+      const el = readPathElement(p());
+      expect(el).not.toBeNull();
+      expect(el!.baseName).toBe(p());
+      expect(el!.path).toBe(p());
+      expect(typeof el!.creation).toBe('number');
+      expect(el!.extName).toBe('');
+      expect(el!.isDirectory).toBeTruthy();
+      expect(el!.isFile).toBeFalsy();
+      expect(el!.isSymbolicLink).toBeFalsy();
+      expect(typeof el!.size).toBe('number');
     });
 
     test('can read a file\'s item', () => {
-      createDirectory(__p());
-      writeTextFile(__p('test-file.txt'), 'Hello World!!');
-      const item = readPathItem(__p('test-file.txt'));
-      expect(item).not.toBeNull();
-      expect(item!.baseName).toBe('test-file.txt');
-      expect(item!.path).toBe(__p('test-file.txt'));
-      expect(typeof item!.creation).toBe('number');
-      expect(item!.extName).toBe('.txt');
-      expect(item!.isDirectory).toBeFalsy();
-      expect(item!.isFile).toBeTruthy();
-      expect(item!.isSymbolicLink).toBeFalsy();
-      expect(typeof item!.size).toBe('number');
+      createDirectory(p());
+      writeTextFile(p('test-file.txt'), 'Hello World!!');
+      const el = readPathElement(p('test-file.txt'));
+      expect(el).not.toBeNull();
+      expect(el!.baseName).toBe('test-file.txt');
+      expect(el!.path).toBe(p('test-file.txt'));
+      expect(typeof el!.creation).toBe('number');
+      expect(el!.extName).toBe('.txt');
+      expect(el!.isDirectory).toBeFalsy();
+      expect(el!.isFile).toBeTruthy();
+      expect(el!.isSymbolicLink).toBeFalsy();
+      expect(typeof el!.size).toBe('number');
     });
   });
 
@@ -117,11 +117,11 @@ describe('Filesystem', () => {
     test.todo('can determine if a path exists and is a directory (a symbolic link)');
 
     test('can create, read and delete a directory', () => {
-      expect(pathExists(__p())).toBeFalsy();
-      createDirectory(__p());
-      expect(pathExists(__p())).toBeTruthy();
-      deleteDirectory(__p());
-      expect(pathExists(__p())).toBeFalsy();
+      expect(pathExists(p())).toBeFalsy();
+      createDirectory(p());
+      expect(pathExists(p())).toBeTruthy();
+      deleteDirectory(p());
+      expect(pathExists(p())).toBeFalsy();
     });
   });
 
