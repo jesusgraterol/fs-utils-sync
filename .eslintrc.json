@@ -3,6 +3,15 @@
   "parserOptions": {
     "project": "./tsconfig.json"
   },
+  "overrides": [
+    {
+      "files": [ "*.test-*.ts" ],
+      "rules": {
+        "object-curly-newline": "off",
+        "import/no-extraneous-dependencies": [ "error", { "devDependencies": true } ]
+      }
+    }
+  ],
   "rules": {
     "no-multiple-empty-lines": [ "error", { "max": 5, "maxEOF": 0 } ],
     "no-underscore-dangle": "off",
