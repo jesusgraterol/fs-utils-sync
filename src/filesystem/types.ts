@@ -15,7 +15,7 @@ interface IPathElement {
   // the base name of the el
   baseName: string,
 
-  // the extension of the el. If the el has no extension, it will be an empty string ('')
+  // the ext of the el (e.g '.json'). If the el has no ext, it will be an empty string ('')
   extName: string,
 
   // true if the el is a file
