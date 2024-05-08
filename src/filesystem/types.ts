@@ -34,6 +34,26 @@ interface IPathElement {
   creation: number,
 }
 
+/**
+ * Read File Options
+ * The options that can be provided to the readFileSync function and determine the output's format.
+ */
+
+// string options
+type IReadStringFileOptions = {
+  encoding: BufferEncoding;
+  flag?: string | undefined;
+} | BufferEncoding;
+
+// Buffer options
+type IReadBufferFileOptions = {
+  encoding?: null | undefined;
+  flag?: string | undefined;
+} | null;
+
+// options
+type IReadFileOptions = IReadBufferFileOptions | IReadStringFileOptions;
+
 
 
 
@@ -42,6 +62,8 @@ interface IPathElement {
  *                                         MODULE EXPORTS                                         *
  ************************************************************************************************ */
 export {
-  // eslint-disable-next-line import/prefer-default-export
   IPathElement,
+  IReadBufferFileOptions,
+  IReadStringFileOptions,
+  IReadFileOptions,
 };

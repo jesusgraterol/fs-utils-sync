@@ -1,3 +1,4 @@
+import { Buffer } from 'node:buffer';
 import {
   accessSync,
   lstatSync,
@@ -5,13 +6,17 @@ import {
   mkdirSync,
   rmSync,
   writeFileSync,
+  readFileSync,
   symlinkSync,
   unlinkSync,
   WriteFileOptions,
 } from 'node:fs';
 import { basename, extname, dirname } from 'node:path';
-import { encodeError } from 'error-message-utils';
-import { IPathElement } from './types.js';
+import { encodeError, extractMessage } from 'error-message-utils';
+import {
+  IPathElement,
+  IReadFileOptions,
+} from './types.js';
 import { ERRORS } from './filesystem.errors.js';
 
 /* ************************************************************************************************
@@ -155,11 +160,81 @@ const writeFile = (
  * @param path
  * @param data
  */
-const writeTextFile = (path: string, data: string): void => writeFile(
-  path,
-  data,
-  { encoding: 'utf-8' },
-);
+const writeTextFile = (path: string, data: string): void => {
+  if (typeof data !== 'string' || !data.length) {
+    console.log(data);
+    throw new Error(encodeError(`The provided data for the file '${path}' is empty or invalid. Received: ${data}`, ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID));
+  }
+  writeFile(path, data, { encoding: 'utf-8' });
+};
+
+/**
+ * Writes a JSON file on a given path. If an object is provided, it will be stringified.
+ * @param path
+ * @param data
+ */
+const writeJSONFile = (path: string, data: object | string) => {
+  let fileData: string;
+  try {
+    fileData = typeof data === 'string' ? data : JSON.stringify(data);
+  } catch (e) {
+    throw new Error(encodeError(`The JSON data for the file '${path}' could not be stringified: ${extractMessage(e)}`, ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID));
+  }
+  writeTextFile(path, fileData);
+};
+
+/**
+ * Reads and returns the contents of a file. Throws an error if the file does not exist or if it
+ * is not considered a file by the OS.
+ * @param path
+ * @param options?
+ * @returns string | Buffer
+ */
+const readFile = (path: string, options: IReadFileOptions = null): string | Buffer => {
+  if (!isFile(path)) {
+    throw new Error(encodeError(`The file '${path}' is not a file.`, ERRORS.NOT_A_FILE));
+  }
+  return readFileSync(path, options);
+};
+
+/**
+ * Reads a text file and returns its contents. Throws if the file doesn't exist or is empty/invalid.
+ * @param path
+ * @returns string
+ */
+const readTextFile = (path: string): string => {
+  const content = readFile(path, { encoding: 'utf8' });
+  if (typeof content !== 'string' || !content.length) {
+    throw new Error(encodeError(`The file '${path}' is empty or invalid.`, ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID));
+  }
+  return content;
+};
+
+/**
+ * Reads a text file and returns its contents. Throws if the file doesn't exist or is empty/invalid.
+ * @param path
+ * @returns object
+ */
+const readJSONFile = (path: string): object => {
+  const content = readTextFile(path);
+  try {
+    return JSON.parse(content);
+  } catch (e) {
+    throw new Error(encodeError(`The JSON file '${path}' cound not be parsed: ${extractMessage(e)}`, ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID));
+  }
+};
+
+/**
+ * Deletes the file located at the provided path. Throws if the file does not exist or if it isn't
+ * considered a file by the OS.
+ * @param path
+ */
+const deleteFile = (path: string) => {
+  if (!isFile(path)) {
+    throw new Error(encodeError(`The file '${path} is not a file.'`, ERRORS.NOT_A_FILE));
+  }
+  unlinkSync(path);
+};
 
 /**
  * Creates a symlink for a given file. It throws if the target file doesnt exist or if it is
@@ -176,18 +251,6 @@ const createFileSymLink = (target: string, path: string) => {
     throw new Error(encodeError(`The target file '${target}' is not a file.`, ERRORS.NOT_A_FILE));
   }
   symlinkSync(target, path, 'file');
-};
-
-/**
- * Deletes the file located at the provided path. Throws if the file does not exist or if it isn't
- * considered a file by the OS.
- * @param path
- */
-const deleteFile = (path: string) => {
-  if (!isFile(path)) {
-    throw new Error(encodeError(`The file '${path} is not a file.'`, ERRORS.NOT_A_FILE));
-  }
-  unlinkSync(path);
 };
 
 
@@ -210,6 +273,10 @@ export {
   isFile,
   writeFile,
   writeTextFile,
-  createFileSymLink,
+  writeJSONFile,
+  readFile,
+  readTextFile,
+  readJSONFile,
   deleteFile,
+  createFileSymLink,
 };

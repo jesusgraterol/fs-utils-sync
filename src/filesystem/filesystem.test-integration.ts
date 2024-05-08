@@ -1,4 +1,5 @@
 import { describe, beforeAll, afterAll, beforeEach, afterEach, test, expect } from 'vitest';
+import { writeFileSync } from 'node:fs';
 import {
   deleteDirectory,
   pathExists,
@@ -10,6 +11,7 @@ import {
   isFile,
   createFileSymLink,
   deleteFile,
+  readTextFile,
 } from './filesystem.js';
 import { ERRORS } from './filesystem.errors.js';
 
@@ -208,11 +210,36 @@ describe('Filesystem', () => {
       });
     });
 
-    test.todo('can determine if a path exists and is a file (not a symbolic link)');
+    describe('writeTextFile & readTextFile', () => {
+      test('attempting to write an empty file throws an error', () => {
+        expect(() => writeTextFile(p('file.txt'), '')).toThrowError(ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID);
+      });
 
-    test.todo('can determine if a path exists and is a file (a symbolic link)');
+      test('can write and read a text file', () => {
+        writeTextFile(p('file.txt'), 'Hello World!');
+        expect(readTextFile(p('file.txt'))).toBe('Hello World!');
+      });
 
-    test.todo('can write, read and delete a text file');
+      test('attempting to read a text file that doesnt exist throws an error', () => {
+        expect(() => readTextFile(p('file.txt'))).toThrowError(ERRORS.NOT_A_FILE);
+      });
+
+      test('attempting to read an empty text file throws an error', () => {
+        createDirectory(p());
+        writeFileSync(p('file.txt'), '', { encoding: 'utf-8' });
+        expect(() => readTextFile(p('file.txt'))).toThrowError(ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID);
+      });
+    });
+
+    describe('writeJSONFile & readJSONFile', () => {
+      test.todo('attempting to write an empty or invalid file throws an error');
+
+      test.todo('can write and read a json file by providing a string or an object');
+
+      test.todo('attempting to read a json file that doesnt exist throws an error');
+
+      test.todo('attempting to read an empty/invalid json file throws an error');
+    });
 
     describe('deleteFile', () => {
       test('can delete a file', () => {
