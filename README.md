@@ -77,7 +77,9 @@ $ npm run test:integration
 
 ## @TODOS
 
-- [ ] ...
+- [ ] `zipDirectory` & `unzipDirectory`
+- [ ] `zipFile` & `unzipFile`
+- [ ] `writeBufferFile` & `readBufferFile`
 
 
 

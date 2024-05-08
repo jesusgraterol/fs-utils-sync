@@ -185,11 +185,12 @@ const writeTextFile = (path: string, data: string): void => {
  * Writes a JSON file on a given path. If an object is provided, it will be stringified.
  * @param path
  * @param data
+ * @param space?
  */
-const writeJSONFile = (path: string, data: object | string) => {
+const writeJSONFile = (path: string, data: object | string, space: number = 2) => {
   let fileData: string;
   try {
-    fileData = typeof data === 'string' ? data : JSON.stringify(data);
+    fileData = typeof data === 'string' ? data : JSON.stringify(data, undefined, space);
   } catch (e) {
     throw new Error(encodeError(`The JSON data for the file '${path}' could not be stringified: ${extractMessage(e)}`, ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID));
   }
