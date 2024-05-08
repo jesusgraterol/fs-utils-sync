@@ -97,8 +97,8 @@ const createDirectory = (path: string, deleteIfExists?: boolean): void => {
 };
 
 /**
- * Creates a symlink for a given directory. It throws if the target dir doesnt exist or if it is a
- * file or a symlink.
+ * Creates a symlink for a given directory. It throws if the target dir doesnt exist or if it is
+ * not considered to be a dir by the OS.
  * @param target
  * @param path
  */
@@ -120,6 +120,16 @@ const createDirectorySymLink = (target: string, path: string) => {
 /* ************************************************************************************************
  *                                          FILE ACTIONS                                          *
  ************************************************************************************************ */
+
+/**
+ * Verifies if a given path exists and is a file.
+ * @param path
+ * @returns boolean
+ */
+const isFile = (path: string): boolean => {
+  const el = getPathElement(path);
+  return el === null ? false : el.isFile;
+};
 
 /**
  * Creates the base directory for a file in case it doesn't exist and then it writes the file.
@@ -150,6 +160,23 @@ const writeTextFile = (path: string, data: string): void => writeFile(
   { encoding: 'utf-8' },
 );
 
+/**
+ * Creates a symlink for a given file. It throws if the target file doesnt exist or if it is
+ * not considered to be a file by the OS.
+ * @param target
+ * @param path
+ */
+const createFileSymLink = (target: string, path: string) => {
+  const el = getPathElement(target);
+  if (el === null) {
+    throw new Error(encodeError(`The target file '${target}' does not exist.`, ERRORS.NON_EXISTENT_FILE));
+  }
+  if (!el.isFile) {
+    throw new Error(encodeError(`The target file '${target}' is not a file.`, ERRORS.NOT_A_FILE));
+  }
+  symlinkSync(target, path, 'file');
+};
+
 
 
 
@@ -169,6 +196,8 @@ export {
   createDirectorySymLink,
 
   // file actions
+  isFile,
   writeFile,
   writeTextFile,
+  createFileSymLink,
 };

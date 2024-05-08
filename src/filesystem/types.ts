@@ -25,7 +25,7 @@ interface IPathElement {
   isDirectory: boolean,
 
   // true if the el is a symbolic link
-  isSymbolicLink: boolean,
+  isSymbolicLink: boolean, // when this property is true, isFile & isDirectory are false
 
   // the size in bytes of the el
   size: number,

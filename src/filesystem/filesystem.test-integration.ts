@@ -7,6 +7,8 @@ import {
   writeTextFile,
   isDirectory,
   createDirectorySymLink,
+  isFile,
+  createFileSymLink,
 } from './filesystem.js';
 import { ERRORS } from './filesystem.errors.js';
 
@@ -194,10 +196,43 @@ describe('Filesystem', () => {
 
     afterEach(() => { });
 
+    describe('isFile', () => {
+      test('can determine if a path is a file', () => {
+        expect(isFile(p())).toBeFalsy();
+        createDirectory(p());
+        expect(isFile(p())).toBeFalsy();
+        expect(isFile(p('some-file.txt'))).toBeFalsy();
+        writeTextFile(p('some-file.txt'), 'Hello World!');
+        expect(isFile(p('some-file.txt'))).toBeTruthy();
+      });
+    });
+
     test.todo('can determine if a path exists and is a file (not a symbolic link)');
 
     test.todo('can determine if a path exists and is a file (a symbolic link)');
 
     test.todo('can write, read and delete a text file');
+
+    describe('createFileSymLink', () => {
+      test('can create a symbolic link for a file', () => {
+        writeTextFile(p('test-file.txt'), 'Hello World!');
+        let el = getPathElement(p('test-file.txt'));
+        expect(el!.isSymbolicLink).toBeFalsy();
+        createFileSymLink(p('test-file.txt'), p('test-file-symlink.txt'));
+        el = getPathElement(p('test-file.txt'));
+        expect(el!.isSymbolicLink).toBeFalsy();
+        el = getPathElement(p('test-file-symlink.txt'));
+        expect(el!.isSymbolicLink).toBeTruthy();
+      });
+
+      test('throws if the target file does not exist', () => {
+        expect(() => createFileSymLink(p('test-file.txt'), p('test-file-symlink.txt'))).toThrowError(ERRORS.NON_EXISTENT_FILE);
+      });
+
+      test('throws if the target file is not a file', () => {
+        createDirectory(p('some-file'));
+        expect(() => createFileSymLink(p('some-file'), p('some-file.txt'))).toThrowError(ERRORS.NOT_A_FILE);
+      });
+    });
   });
 });
