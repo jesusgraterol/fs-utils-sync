@@ -65,17 +65,11 @@ const getPathElement = (path: string): IPathElement | null => {
 /**
  * Verifies if a given path exists and is a directory.
  * @param path
- * @param allowSymbolicLink?
  * @returns boolean
  */
-const isDirectory = (path: string, allowSymbolicLink: boolean = true): boolean => {
+const isDirectory = (path: string): boolean => {
   const el = getPathElement(path);
-  if (el) {
-    return el.isDirectory && (
-      !el.isSymbolicLink || (el.isSymbolicLink && allowSymbolicLink)
-    );
-  }
-  return false;
+  return el === null ? false : el.isDirectory;
 };
 
 /**
@@ -104,7 +98,7 @@ const createDirectory = (path: string, deleteIfExists?: boolean): void => {
 
 /**
  * Creates a symlink for a given directory. It throws if the target dir doesnt exist or if it is a
- * symlink.
+ * file or a symlink.
  * @param target
  * @param path
  */

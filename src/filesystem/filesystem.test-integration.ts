@@ -124,9 +124,13 @@ describe('Filesystem', () => {
     afterEach(() => { });
 
     describe('isDirectory', () => {
-      test.todo('can determine if a path exists and is a directory (not a symbolic link)');
-
-      test.todo('can determine if a path exists and is a directory (a symbolic link)');
+      test('can determine if a path is a directory', () => {
+        expect(isDirectory(p())).toBeFalsy();
+        writeTextFile(p('some-file.txt'), 'Hello world!');
+        expect(isDirectory(p())).toBeTruthy();
+        expect(pathExists(p('some-file.txt'))).toBeTruthy();
+        expect(isDirectory(p('some-file.txt'))).toBeFalsy();
+      });
     });
 
     describe('createDirectory & deleteDirectory', () => {
