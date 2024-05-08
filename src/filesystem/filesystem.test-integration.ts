@@ -14,6 +14,7 @@ import {
   readTextFile,
   writeJSONFile,
   readJSONFile,
+  copyFile,
 } from './filesystem.js';
 import { ERRORS } from './filesystem.errors.js';
 
@@ -232,6 +233,33 @@ describe('Filesystem', () => {
         createDirectory(p());
         writeFileSync(p('file.json'), '', { encoding: 'utf-8' });
         expect(() => readJSONFile(p('file.json'))).toThrowError(ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID);
+      });
+    });
+
+    describe('copyFile', () => {
+      test('throws if the source path is not a file', () => {
+        expect(() => copyFile(p('file.txt'), p('file-b.txt'))).toThrowError(ERRORS.NOT_A_FILE);
+      });
+
+      test('can copy a text file from a to b', () => {
+        writeTextFile(p('file-a.txt'), 'This is file-a.txt!');
+        copyFile(p('file-a.txt'), p('file-b.txt'));
+        expect(readTextFile(p('file-b.txt'))).toBe('This is file-a.txt!');
+      });
+
+      test('can copy a JSON file from a to b', () => {
+        writeJSONFile(p('file-a.json'), { id: 1, name: 'jess' });
+        copyFile(p('file-a.json'), p('file-b.json'));
+        expect(readJSONFile(p('file-b.json'))).toStrictEqual({ id: 1, name: 'jess' });
+      });
+
+      test('can override the destination path if it already exists', () => {
+        writeTextFile(p('file-a.txt'), 'This is file-a.txt!');
+        expect(readTextFile(p('file-a.txt'))).toBe('This is file-a.txt!');
+        writeTextFile(p('file-b.txt'), 'This is file-b.txt!');
+        expect(readTextFile(p('file-b.txt'))).toBe('This is file-b.txt!');
+        copyFile(p('file-b.txt'), p('file-a.txt'));
+        expect(readTextFile(p('file-a.txt'))).toBe('This is file-b.txt!');
       });
     });
 

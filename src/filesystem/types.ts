@@ -34,6 +34,10 @@ interface IPathElement {
   creation: number,
 }
 
+
+
+
+
 /**
  * Read File Options
  * The options that can be provided to the readFileSync function and determine the output's format.

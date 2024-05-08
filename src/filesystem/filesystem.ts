@@ -9,14 +9,12 @@ import {
   readFileSync,
   symlinkSync,
   unlinkSync,
+  copyFileSync,
   WriteFileOptions,
 } from 'node:fs';
 import { basename, extname, dirname } from 'node:path';
 import { encodeError, extractMessage } from 'error-message-utils';
-import {
-  IPathElement,
-  IReadFileOptions,
-} from './types.js';
+import { IPathElement, IReadFileOptions } from './types.js';
 import { ERRORS } from './filesystem.errors.js';
 
 /* ************************************************************************************************
@@ -225,6 +223,19 @@ const readJSONFile = (path: string): object => {
 };
 
 /**
+ * Copies a file from srcPath to destPath, replacing the destination if it exists. Throws if the
+ * srcPath doesn't exist or is not considered a file by the OS.
+ * @param srcPath
+ * @param destPath
+ */
+const copyFile = (srcPath: string, destPath: string) => {
+  if (!isFile(srcPath)) {
+    throw new Error(encodeError(`The file '${srcPath}' is not a file.`, ERRORS.NOT_A_FILE));
+  }
+  copyFileSync(srcPath, destPath);
+};
+
+/**
  * Deletes the file located at the provided path. Throws if the file does not exist or if it isn't
  * considered a file by the OS.
  * @param path
@@ -277,6 +288,7 @@ export {
   readFile,
   readTextFile,
   readJSONFile,
+  copyFile,
   deleteFile,
   createFileSymLink,
 };
