@@ -12,6 +12,8 @@ import {
   createFileSymLink,
   deleteFile,
   readTextFile,
+  writeJSONFile,
+  readJSONFile,
 } from './filesystem.js';
 import { ERRORS } from './filesystem.errors.js';
 
@@ -53,14 +55,6 @@ describe('Filesystem', () => {
   *                                        GENERAL ACTIONS                                        *
   *********************************************************************************************** */
   describe('General Actions', () => {
-    beforeAll(() => { });
-
-    afterAll(() => { });
-
-    beforeEach(() => { });
-
-    afterEach(() => { });
-
     describe('pathExists', () => {
       test('can determine if a path does not exist', () => {
         expect(pathExists(p())).toBeFalsy();
@@ -120,14 +114,6 @@ describe('Filesystem', () => {
   *                                      DIRECTORY ACTIONS                                        *
   *********************************************************************************************** */
   describe('Directory Actions', () => {
-    beforeAll(() => { });
-
-    afterAll(() => { });
-
-    beforeEach(() => { });
-
-    afterEach(() => { });
-
     describe('isDirectory', () => {
       test('can determine if a path is a directory', () => {
         expect(isDirectory(p())).toBeFalsy();
@@ -191,14 +177,6 @@ describe('Filesystem', () => {
   *                                          FILE ACTIONS                                         *
   *********************************************************************************************** */
   describe('File Actions', () => {
-    beforeAll(() => { });
-
-    afterAll(() => { });
-
-    beforeEach(() => { });
-
-    afterEach(() => { });
-
     describe('isFile', () => {
       test('can determine if a path is a file', () => {
         expect(isFile(p())).toBeFalsy();
@@ -232,13 +210,29 @@ describe('Filesystem', () => {
     });
 
     describe('writeJSONFile & readJSONFile', () => {
-      test.todo('attempting to write an empty or invalid file throws an error');
+      test('attempting to write an empty or invalid file throws an error', () => {
+        expect(() => writeJSONFile(p('file.json'), '')).toThrowError(ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID);
+      });
 
-      test.todo('can write and read a json file by providing a string or an object');
+      test('can write and read a json file by providing a string', () => {
+        writeJSONFile(p('file.json'), JSON.stringify({ foo: 'bar', baz: true, tan: 123 }));
+        expect(readJSONFile(p('file.json'))).toStrictEqual({ foo: 'bar', baz: true, tan: 123 });
+      });
 
-      test.todo('attempting to read a json file that doesnt exist throws an error');
+      test('can write and read a json file by providing an object', () => {
+        writeJSONFile(p('file.json'), { foo: 'bar', baz: true, tan: 123 });
+        expect(readJSONFile(p('file.json'))).toStrictEqual({ foo: 'bar', baz: true, tan: 123 });
+      });
 
-      test.todo('attempting to read an empty/invalid json file throws an error');
+      test('attempting to read a json file that doesnt exist throws an error', () => {
+        expect(() => readJSONFile(p('file.json'))).toThrowError(ERRORS.NOT_A_FILE);
+      });
+
+      test('attempting to read an empty/invalid json file throws an error', () => {
+        createDirectory(p());
+        writeFileSync(p('file.json'), '', { encoding: 'utf-8' });
+        expect(() => readJSONFile(p('file.json'))).toThrowError(ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID);
+      });
     });
 
     describe('deleteFile', () => {
