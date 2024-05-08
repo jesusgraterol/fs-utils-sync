@@ -85,10 +85,11 @@ const isDirectory = (path: string): boolean => {
 const deleteDirectory = (path: string): void => rmSync(path, { recursive: true, force: true });
 
 /**
- * Creates a directory at a given path. Note that if the directory already exists and
- * deleteIfExists is falsy, it will throw the DIRECTORY_ALREADY_EXISTS error.
+ * Creates a directory at a given path.
  * @param path
  * @param deleteIfExists?
+ * @throws
+ * - DIRECTORY_ALREADY_EXISTS: if the directory already exists and deleteIfExists is falsy
  */
 const createDirectory = (path: string, deleteIfExists?: boolean): void => {
   // check if the dir already exists and if it should be deleted
@@ -103,12 +104,14 @@ const createDirectory = (path: string, deleteIfExists?: boolean): void => {
 };
 
 /**
- * It copies a directory (and sub directories) from srcPath to destPath. Throws if the srcPath is
- * not a directory. Keep in mind the destPath is completely overridden.
+ * It copies a directory (and sub directories) from srcPath to destPath. Keep in mind the destPath
+ * is completely overridden.
  * @param srcPath
  * @param destPath
+ * @throws
+ * - NOT_A_DIRECTORY: if the srcPath is not a directory
  */
-const copyDirectory = (srcPath: string, destPath: string) => {
+const copyDirectory = (srcPath: string, destPath: string): void => {
   if (!isDirectory(srcPath)) {
     throw new Error(encodeError(`The srcPath '${srcPath}' is not a directory.`, ERRORS.NOT_A_DIRECTORY));
   }
@@ -117,12 +120,14 @@ const copyDirectory = (srcPath: string, destPath: string) => {
 };
 
 /**
- * Creates a symlink for a given directory. It throws if the target dir doesnt exist or if it is
- * not considered to be a dir by the OS.
+ * Creates a symlink for the target directory at path.
  * @param target
  * @param path
+ * @throws
+ * - NON_EXISTENT_DIRECTORY: if the target directory doesn't exist
+ * - NOT_A_DIRECTORY: if the target directory is not considered a directory by the OS
  */
-const createDirectorySymLink = (target: string, path: string) => {
+const createDirectorySymLink = (target: string, path: string): void => {
   const el = getPathElement(target);
   if (el === null) {
     throw new Error(encodeError(`The target dir '${target}' does not exist.`, ERRORS.NON_EXISTENT_DIRECTORY));
@@ -134,10 +139,11 @@ const createDirectorySymLink = (target: string, path: string) => {
 };
 
 /**
- * Reads the contents of a directory based on the provided options and returns them. Throws if the
- * directory doesn't exist.
+ * Reads the contents of a directory based on the provided options and returns them.
  * @param path
- * @returns string[]
+ * @returns string[] | Buffer[]
+ * @throws
+ * - NOT_A_DIRECTORY: if the directory is not considered a directory by the OS.
  */
 const readDirectory = (
   path: string,
