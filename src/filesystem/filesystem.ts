@@ -10,6 +10,7 @@ import {
   symlinkSync,
   unlinkSync,
   copyFileSync,
+  cpSync,
   WriteFileOptions,
 } from 'node:fs';
 import { basename, extname, dirname } from 'node:path';
@@ -98,6 +99,20 @@ const createDirectory = (path: string, deleteIfExists?: boolean): void => {
     }
   }
   mkdirSync(path, { recursive: true });
+};
+
+/**
+ * It copies a directory (and sub directories) from srcPath to destPath. Throws if the srcPath is
+ * not a directory. Keep in mind the destPath is completely overridden.
+ * @param srcPath
+ * @param destPath
+ */
+const copyDirectory = (srcPath: string, destPath: string) => {
+  if (!isDirectory(srcPath)) {
+    throw new Error(encodeError(`The srcPath '${srcPath}' is not a directory.`, ERRORS.NOT_A_DIRECTORY));
+  }
+  deleteDirectory(destPath);
+  cpSync(srcPath, destPath, { recursive: true });
 };
 
 /**
@@ -277,6 +292,7 @@ export {
   // directory actions
   isDirectory,
   createDirectory,
+  copyDirectory,
   deleteDirectory,
   createDirectorySymLink,
 

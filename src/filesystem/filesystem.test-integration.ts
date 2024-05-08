@@ -15,6 +15,7 @@ import {
   writeJSONFile,
   readJSONFile,
   copyFile,
+  copyDirectory,
 } from './filesystem.js';
 import { ERRORS } from './filesystem.errors.js';
 
@@ -144,6 +145,39 @@ describe('Filesystem', () => {
       test('can create a directory on top of another if the deleteIfExists arg is provided', () => {
         createDirectory(p('test-dir'));
         expect(() => createDirectory(p('test-dir'), true)).not.toThrowError();
+      });
+    });
+
+    describe('copyDirectory', () => {
+      test('throws an error if the source path is not a directory', () => {
+        expect(() => copyDirectory(p('dir-a'), p('dir-b'))).toThrow(ERRORS.NOT_A_DIRECTORY);
+      });
+
+      test('can copy a directory with some files and sub directories in it', () => {
+        writeTextFile(p('dir-a/file-a.txt'), 'This is file a!');
+        writeTextFile(p('dir-a/file-b.txt'), 'This is file b!');
+        writeTextFile(p('dir-a/b/file-ab.txt'), 'This is file ab!');
+        writeJSONFile(p('dir-a/b/c/file-abc.json'), { name: 'file-abc.json', description: 'This is file abc!' });
+
+        copyDirectory(p('dir-a'), p('dir-b'));
+        expect(isDirectory(p('dir-b'))).toBeTruthy();
+        expect(readTextFile(p('dir-b/file-a.txt'))).toBe('This is file a!');
+        expect(readTextFile(p('dir-b/file-b.txt'))).toBe('This is file b!');
+        expect(isDirectory(p('dir-b/b'))).toBeTruthy();
+        expect(readTextFile(p('dir-b/b/file-ab.txt'))).toBe('This is file ab!');
+        expect(isDirectory(p('dir-b/b/c'))).toBeTruthy();
+        expect(readJSONFile(p('dir-b/b/c/file-abc.json'))).toStrictEqual({ name: 'file-abc.json', description: 'This is file abc!' });
+      });
+
+      test('can copy a directory with some files in it, overriding the destination', () => {
+        writeTextFile(p('dir-a/file-a.txt'), 'This is file a!');
+        writeTextFile(p('dir-a/file-b.txt'), 'This is file b!');
+        writeTextFile(p('dir-b/file-a.txt'), 'This is file ba!');
+        writeTextFile(p('dir-b/file-b.txt'), 'This is file bb!');
+
+        copyDirectory(p('dir-a'), p('dir-b'));
+        expect(readTextFile(p('dir-b/file-a.txt'))).toBe('This is file a!');
+        expect(readTextFile(p('dir-b/file-b.txt'))).toBe('This is file b!');
       });
     });
 
