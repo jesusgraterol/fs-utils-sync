@@ -11,11 +11,12 @@ import {
   unlinkSync,
   copyFileSync,
   cpSync,
+  readdirSync,
   WriteFileOptions,
 } from 'node:fs';
 import { basename, extname, dirname } from 'node:path';
 import { encodeError, extractMessage } from 'error-message-utils';
-import { IPathElement, IReadFileOptions } from './types.js';
+import { IPathElement, IReadDirectoryOptions, IReadFileOptions } from './types.js';
 import { ERRORS } from './filesystem.errors.js';
 
 /* ************************************************************************************************
@@ -132,7 +133,21 @@ const createDirectorySymLink = (target: string, path: string) => {
   symlinkSync(target, path, 'dir');
 };
 
-
+/**
+ * Reads the contents of a directory based on the provided options and returns them. Throws if the
+ * directory doesn't exist.
+ * @param path
+ * @returns string[]
+ */
+const readDirectory = (
+  path: string,
+  options: IReadDirectoryOptions = { encoding: 'utf-8', recursive: true },
+): string[] | Buffer[] => {
+  if (!isDirectory(path)) {
+    throw new Error(encodeError(`The dir '${path}' is not a directory.`, ERRORS.NOT_A_DIRECTORY));
+  }
+  return readdirSync(path, options).map((contentPath) => `${path}/${contentPath}`);
+};
 
 
 
@@ -296,6 +311,7 @@ export {
   copyDirectory,
   deleteDirectory,
   createDirectorySymLink,
+  readDirectory,
 
   // file actions
   isFile,

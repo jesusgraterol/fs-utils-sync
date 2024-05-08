@@ -16,6 +16,7 @@ import {
   readJSONFile,
   copyFile,
   copyDirectory,
+  readDirectory,
 } from './filesystem.js';
 import { ERRORS } from './filesystem.errors.js';
 
@@ -200,6 +201,32 @@ describe('Filesystem', () => {
       test('throws if the target directory is not a directory', () => {
         writeTextFile(p('some-file.txt'), 'Hello World!');
         expect(() => createDirectorySymLink(p('some-file.txt'), p('test-dir-symlink'))).toThrowError(ERRORS.NOT_A_DIRECTORY);
+      });
+    });
+
+    describe('readDirectory', () => {
+      test('throws if the directory doesnt exist', () => {
+        expect(() => readDirectory(p())).toThrowError(ERRORS.NOT_A_DIRECTORY);
+      });
+
+      test('can read all the contents of a directory', () => {
+        writeTextFile(p('file-01.txt'), 'Hello There!! 01');
+        writeTextFile(p('file-02.txt'), 'Hello There!! 02');
+        writeJSONFile(p('file-03.json'), { hello: 'World' });
+        writeTextFile(p('inner/file-01.txt'), 'Hello There!! inner/01');
+        writeTextFile(p('inner/inner-01.txt'), 'Hello There!! inner/01');
+        writeJSONFile(p('inner/inner-02.json'), { foo: 'bar' });
+        createDirectory(p('inner/inner2'));
+        expect(readDirectory(p())).toEqual([
+          p('file-01.txt'),
+          p('file-02.txt'),
+          p('file-03.json'),
+          p('inner'),
+          p('inner/file-01.txt'),
+          p('inner/inner-01.txt'),
+          p('inner/inner-02.json'),
+          p('inner/inner2'),
+        ]);
       });
     });
   });
