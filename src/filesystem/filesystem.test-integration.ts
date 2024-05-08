@@ -9,6 +9,7 @@ import {
   createDirectorySymLink,
   isFile,
   createFileSymLink,
+  deleteFile,
 } from './filesystem.js';
 import { ERRORS } from './filesystem.errors.js';
 
@@ -212,6 +213,30 @@ describe('Filesystem', () => {
     test.todo('can determine if a path exists and is a file (a symbolic link)');
 
     test.todo('can write, read and delete a text file');
+
+    describe('deleteFile', () => {
+      test('can delete a file', () => {
+        writeTextFile(p('some-file.txt'), 'Hello World!');
+        expect(isFile(p('some-file.txt'))).toBeTruthy();
+        deleteFile(p('some-file.txt'));
+        expect(isFile(p('some-file.txt'))).toBeFalsy();
+      });
+
+      test('throws if the file does not exist or if it isn\'t a file', () => {
+        expect(() => deleteFile(p('some-file.txt'))).toThrowError(ERRORS.NOT_A_FILE);
+      });
+
+      test('throws if attempting to delete a directory', () => {
+        createDirectory(p());
+        expect(() => deleteFile(p())).toThrowError(ERRORS.NOT_A_FILE);
+      });
+
+      test('throws if attempting to delete a symlink', () => {
+        writeTextFile(p('some-file.txt'), 'Hello World!');
+        createFileSymLink(p('some-file.txt'), p('some-file-symlink.txt'));
+        expect(() => deleteFile(p('some-file-symlink.txt'))).toThrowError(ERRORS.NOT_A_FILE);
+      });
+    });
 
     describe('createFileSymLink', () => {
       test('can create a symbolic link for a file', () => {

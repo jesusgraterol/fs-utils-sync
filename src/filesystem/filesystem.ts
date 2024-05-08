@@ -6,6 +6,7 @@ import {
   rmSync,
   writeFileSync,
   symlinkSync,
+  unlinkSync,
   WriteFileOptions,
 } from 'node:fs';
 import { basename, extname, dirname } from 'node:path';
@@ -177,7 +178,17 @@ const createFileSymLink = (target: string, path: string) => {
   symlinkSync(target, path, 'file');
 };
 
-
+/**
+ * Deletes the file located at the provided path. Throws if the file does not exist or if it isn't
+ * considered a file by the OS.
+ * @param path
+ */
+const deleteFile = (path: string) => {
+  if (!isFile(path)) {
+    throw new Error(encodeError(`The file '${path} is not a file.'`, ERRORS.NOT_A_FILE));
+  }
+  unlinkSync(path);
+};
 
 
 
@@ -200,4 +211,5 @@ export {
   writeFile,
   writeTextFile,
   createFileSymLink,
+  deleteFile,
 };
