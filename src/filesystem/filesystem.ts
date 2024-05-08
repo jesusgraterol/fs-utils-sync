@@ -1,4 +1,3 @@
-
 import {
   accessSync,
   lstatSync,
@@ -6,8 +5,10 @@ import {
   mkdirSync,
   rmSync,
   writeFileSync,
+  symlinkSync,
+  WriteFileOptions,
 } from 'node:fs';
-import { basename, extname } from 'node:path';
+import { basename, extname, dirname } from 'node:path';
 import { encodeError } from 'error-message-utils';
 import { IPathElement } from './types.js';
 import { ERRORS } from './filesystem.errors.js';
@@ -36,7 +37,7 @@ const pathExists = (path: string): boolean => {
  * @param path
  * @returns IPathElement | null
  */
-const readPathElement = (path: string): IPathElement | null => {
+const getPathElement = (path: string): IPathElement | null => {
   try {
     const item: Stats = lstatSync(path);
     return {
@@ -68,7 +69,7 @@ const readPathElement = (path: string): IPathElement | null => {
  * @returns boolean
  */
 const isDirectory = (path: string, allowSymbolicLink: boolean = true): boolean => {
-  const el = readPathElement(path);
+  const el = getPathElement(path);
   if (el) {
     return el.isDirectory && (
       !el.isSymbolicLink || (el.isSymbolicLink && allowSymbolicLink)
@@ -98,7 +99,24 @@ const createDirectory = (path: string, deleteIfExists?: boolean): void => {
       throw new Error(encodeError(`The directory ${path} already exists.`, ERRORS.DIRECTORY_ALREADY_EXISTS));
     }
   }
-  mkdirSync(path);
+  mkdirSync(path, { recursive: true });
+};
+
+/**
+ * Creates a symlink for a given directory. It throws if the target dir doesnt exist or if it is a
+ * symlink.
+ * @param target
+ * @param path
+ */
+const createDirectorySymLink = (target: string, path: string) => {
+  const el = getPathElement(target);
+  if (el === null) {
+    throw new Error(encodeError(`The target dir '${target}' does not exist.`, ERRORS.NON_EXISTENT_DIRECTORY));
+  }
+  if (!el.isDirectory) {
+    throw new Error(encodeError(`The target dir '${target}' is not a directory.`, ERRORS.NOT_A_DIRECTORY));
+  }
+  symlinkSync(target, path, 'dir');
 };
 
 
@@ -110,11 +128,29 @@ const createDirectory = (path: string, deleteIfExists?: boolean): void => {
  ************************************************************************************************ */
 
 /**
+ * Creates the base directory for a file in case it doesn't exist and then it writes the file.
+ * @param path
+ * @param data
+ * @param options
+ */
+const writeFile = (
+  path: string,
+  data: string | NodeJS.ArrayBufferView,
+  options: WriteFileOptions | undefined,
+) => {
+  const dirName = dirname(path);
+  if (!pathExists(dirName)) {
+    createDirectory(dirName);
+  }
+  writeFileSync(path, data, options);
+};
+
+/**
  * Writes a text file on a given path.
  * @param path
  * @param data
  */
-const writeTextFile = (path: string, data: string): void => writeFileSync(
+const writeTextFile = (path: string, data: string): void => writeFile(
   path,
   data,
   { encoding: 'utf-8' },
@@ -130,13 +166,15 @@ const writeTextFile = (path: string, data: string): void => writeFileSync(
 export {
   // general actions
   pathExists,
-  readPathElement,
+  getPathElement,
 
   // directory actions
   isDirectory,
   createDirectory,
   deleteDirectory,
+  createDirectorySymLink,
 
   // file actions
+  writeFile,
   writeTextFile,
 };

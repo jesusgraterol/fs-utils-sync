@@ -1,8 +1,9 @@
-/**
- * Errors
- * The filesystem-utils-async handles errors in string format.
- */
+/* ************************************************************************************************
+ *                                             ERRORS                                             *
+ ************************************************************************************************ */
 const enum ERRORS {
+  NOT_A_DIRECTORY = 'NOT_A_DIRECTORY',
+  NON_EXISTENT_DIRECTORY = 'NON_EXISTENT_DIRECTORY',
   DIRECTORY_ALREADY_EXISTS = 'DIRECTORY_ALREADY_EXISTS',
 }
 

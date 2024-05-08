@@ -3,9 +3,12 @@ import {
   deleteDirectory,
   pathExists,
   createDirectory,
-  readPathElement,
+  getPathElement,
   writeTextFile,
+  isDirectory,
+  createDirectorySymLink,
 } from './filesystem.js';
+import { ERRORS } from './filesystem.errors.js';
 
 /* ************************************************************************************************
  *                                           CONSTANTS                                            *
@@ -53,47 +56,54 @@ describe('Filesystem', () => {
 
     afterEach(() => { });
 
-    test('can determine if a path does not exist', () => {
-      expect(pathExists(p())).toBeFalsy();
+    describe('pathExists', () => {
+      test('can determine if a path does not exist', () => {
+        expect(pathExists(p())).toBeFalsy();
+        expect(pathExists(p('some-file.txt'))).toBeFalsy();
+      });
+
+      test('can determine if a path exists', () => {
+        createDirectory(p());
+        expect(pathExists(p())).toBeTruthy();
+        writeTextFile(p('some-file.txt'), 'Hello World!');
+        expect(pathExists(p('some-file.txt'))).toBeTruthy();
+      });
     });
 
-    test('can determine if a path exists', () => {
-      createDirectory(p());
-      expect(pathExists(p())).toBeTruthy();
-    });
+    describe('getPathElement', () => {
+      test('returns null when a path element does not exist', () => {
+        expect(getPathElement(p())).toBeNull();
+        expect(getPathElement(p('test-file.txt'))).toBeNull();
+      });
 
-    test('returns null when a path item does not exist', () => {
-      expect(readPathElement(p())).toBeNull();
-      expect(readPathElement(p('test-file.txt'))).toBeNull();
-    });
+      test('can read a directory\'s element', () => {
+        createDirectory(p());
+        const el = getPathElement(p());
+        expect(el).not.toBeNull();
+        expect(el!.baseName).toBe(p());
+        expect(el!.path).toBe(p());
+        expect(typeof el!.creation).toBe('number');
+        expect(el!.extName).toBe('');
+        expect(el!.isDirectory).toBeTruthy();
+        expect(el!.isFile).toBeFalsy();
+        expect(el!.isSymbolicLink).toBeFalsy();
+        expect(typeof el!.size).toBe('number');
+      });
 
-    test('can read a directory\'s item', () => {
-      createDirectory(p());
-      const el = readPathElement(p());
-      expect(el).not.toBeNull();
-      expect(el!.baseName).toBe(p());
-      expect(el!.path).toBe(p());
-      expect(typeof el!.creation).toBe('number');
-      expect(el!.extName).toBe('');
-      expect(el!.isDirectory).toBeTruthy();
-      expect(el!.isFile).toBeFalsy();
-      expect(el!.isSymbolicLink).toBeFalsy();
-      expect(typeof el!.size).toBe('number');
-    });
-
-    test('can read a file\'s item', () => {
-      createDirectory(p());
-      writeTextFile(p('test-file.txt'), 'Hello World!!');
-      const el = readPathElement(p('test-file.txt'));
-      expect(el).not.toBeNull();
-      expect(el!.baseName).toBe('test-file.txt');
-      expect(el!.path).toBe(p('test-file.txt'));
-      expect(typeof el!.creation).toBe('number');
-      expect(el!.extName).toBe('.txt');
-      expect(el!.isDirectory).toBeFalsy();
-      expect(el!.isFile).toBeTruthy();
-      expect(el!.isSymbolicLink).toBeFalsy();
-      expect(typeof el!.size).toBe('number');
+      test('can read a file\'s element', () => {
+        createDirectory(p());
+        writeTextFile(p('test-file.txt'), 'Hello World!!');
+        const el = getPathElement(p('test-file.txt'));
+        expect(el).not.toBeNull();
+        expect(el!.baseName).toBe('test-file.txt');
+        expect(el!.path).toBe(p('test-file.txt'));
+        expect(typeof el!.creation).toBe('number');
+        expect(el!.extName).toBe('.txt');
+        expect(el!.isDirectory).toBeFalsy();
+        expect(el!.isFile).toBeTruthy();
+        expect(el!.isSymbolicLink).toBeFalsy();
+        expect(typeof el!.size).toBe('number');
+      });
     });
   });
 
@@ -113,16 +123,54 @@ describe('Filesystem', () => {
 
     afterEach(() => { });
 
-    test.todo('can determine if a path exists and is a directory (not a symbolic link)');
+    describe('isDirectory', () => {
+      test.todo('can determine if a path exists and is a directory (not a symbolic link)');
 
-    test.todo('can determine if a path exists and is a directory (a symbolic link)');
+      test.todo('can determine if a path exists and is a directory (a symbolic link)');
+    });
 
-    test('can create, read and delete a directory', () => {
-      expect(pathExists(p())).toBeFalsy();
-      createDirectory(p());
-      expect(pathExists(p())).toBeTruthy();
-      deleteDirectory(p());
-      expect(pathExists(p())).toBeFalsy();
+    describe('createDirectory & deleteDirectory', () => {
+      test('can create, read and delete a directory', () => {
+        expect(pathExists(p())).toBeFalsy();
+        createDirectory(p());
+        expect(pathExists(p())).toBeTruthy();
+        deleteDirectory(p());
+        expect(pathExists(p())).toBeFalsy();
+      });
+
+      test('throws an error when attempting to create a directory on top of an existing one', () => {
+        expect(isDirectory(p('test-dir'))).toBeFalsy();
+        createDirectory(p('test-dir'));
+        expect(isDirectory(p('test-dir'))).toBeTruthy();
+        expect(() => createDirectory(p('test-dir'))).toThrowError(ERRORS.DIRECTORY_ALREADY_EXISTS);
+      });
+
+      test('can create a directory on top of another if the deleteIfExists arg is provided', () => {
+        createDirectory(p('test-dir'));
+        expect(() => createDirectory(p('test-dir'), true)).not.toThrowError();
+      });
+    });
+
+    describe('createDirectorySymLink', () => {
+      test('can create a symbolic link for a directory', () => {
+        createDirectory(p('test-dir'));
+        let el = getPathElement(p('test-dir'));
+        expect(el!.isSymbolicLink).toBeFalsy();
+        createDirectorySymLink(p('test-dir'), p('test-dir-symlink'));
+        el = getPathElement(p('test-dir'));
+        expect(el!.isSymbolicLink).toBeFalsy();
+        el = getPathElement(p('test-dir-symlink'));
+        expect(el!.isSymbolicLink).toBeTruthy();
+      });
+
+      test('throws if the target directory does not exist', () => {
+        expect(() => createDirectorySymLink(p('test-dir'), p('test-dir-symlink'))).toThrowError(ERRORS.NON_EXISTENT_DIRECTORY);
+      });
+
+      test('throws if the target directory is not a directory', () => {
+        writeTextFile(p('some-file.txt'), 'Hello World!');
+        expect(() => createDirectorySymLink(p('some-file.txt'), p('test-dir-symlink'))).toThrowError(ERRORS.NOT_A_DIRECTORY);
+      });
     });
   });
 
