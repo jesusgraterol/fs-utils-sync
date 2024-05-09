@@ -38,6 +38,7 @@ interface IPathElement {
 
 
 
+
 /**
  * Read Directory Options
  * The options that can be provided to the readdirSync function to determine the output's format.
@@ -46,6 +47,41 @@ type IReadDirectoryOptions = (ObjectEncodingOptions & {
   withFileTypes?: false | undefined;
   recursive?: boolean | undefined;
 }) | BufferEncoding | null;
+
+
+
+
+
+/**
+ * Directory Elements Options
+ * When querying the path elements from within a directory, a series of filters and sorting options
+ * can be provided.
+ */
+
+type IDirectoryElementsKeySort = 'baseName' | 'size' | 'creation';
+
+type IDirectoryElementsSortOrder = 'asc' | 'desc';
+
+interface IDirectoryElementsOptions {
+  // the key that will be used to sort the elements. Defaults to 'baseName'
+  sortByKey: IDirectoryElementsKeySort,
+
+  // the sort order that will be applied to the elements. Defaults to 'asc'
+  sortOrder: IDirectoryElementsSortOrder,
+
+  // the list of file extensions that will be included. Defaults to [] (includes all exts)
+  includeExts: string[],
+}
+
+/**
+ * Directory Path Elements
+ * The output emitted when retrieving all the path elements within a directory.
+ */
+interface IDirectoryPathElements {
+  directories: IPathElement[],
+  files: IPathElement[],
+  symbolicLinks: IPathElement[]
+}
 
 
 
@@ -81,6 +117,10 @@ type IReadFileOptions = IReadBufferFileOptions | IReadStringFileOptions;
 export {
   IPathElement,
   IReadDirectoryOptions,
+  IDirectoryElementsKeySort,
+  IDirectoryElementsSortOrder,
+  IDirectoryElementsOptions,
+  IDirectoryPathElements,
   IReadBufferFileOptions,
   IReadStringFileOptions,
   IReadFileOptions,

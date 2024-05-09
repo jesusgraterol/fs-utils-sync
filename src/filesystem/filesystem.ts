@@ -16,8 +16,15 @@ import {
 } from 'node:fs';
 import { basename, extname, dirname } from 'node:path';
 import { encodeError, extractMessage } from 'error-message-utils';
-import { IPathElement, IReadDirectoryOptions, IReadFileOptions } from './types.js';
+import {
+  IPathElement,
+  IReadDirectoryOptions,
+  IDirectoryElementsOptions,
+  IDirectoryPathElements,
+  IReadFileOptions,
+} from './types.js';
 import { ERRORS } from './filesystem.errors.js';
+import { buildDirectoryElementsOptions } from './filesystem.utils.js';
 
 /* ************************************************************************************************
  *                                        GENERAL ACTIONS                                         *
@@ -157,7 +164,32 @@ const readDirectory = (
   return readdirSync(path, options).map((contentPath) => `${path}/${contentPath}`);
 };
 
+/**
+ * Retrieves all the path elements in the given directory based on the provided options.
+ * @param path
+ * @param options?
+ * @returns IDirectoryPathElements
+ * @throws
+ * - NOT_A_DIRECTORY: if the directory doesn't exist or is not considered a directory by the OS
+ */
+const getDirectoryElements = (
+  path: string,
+  options?: Partial<IDirectoryElementsOptions>,
+): IDirectoryPathElements => {
+  if (!isDirectory(path)) {
+    throw new Error(encodeError(`The path '${path} is not a directory'`, ERRORS.NOT_A_DIRECTORY));
+  }
+  // build the options
+  const opts = buildDirectoryElementsOptions(options);
 
+  // init the lists
+  let directories: IPathElement[] = [];
+  let files: IPathElement[] = [];
+  let symbolicLinks: IPathElement[] = [];
+
+  // finally, return the elements build
+  return { directories, files, symbolicLinks };
+};
 
 
 
@@ -371,6 +403,7 @@ export {
   deleteDirectory,
   createDirectorySymLink,
   readDirectory,
+  getDirectoryElements,
 
   // file actions
   isFile,
