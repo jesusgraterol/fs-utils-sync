@@ -181,7 +181,7 @@ const writeFile = (
   path: string,
   data: string | NodeJS.ArrayBufferView,
   options: WriteFileOptions | undefined,
-) => {
+): void => {
   const dirName = dirname(path);
   if (!pathExists(dirName)) {
     createDirectory(dirName);
@@ -193,6 +193,8 @@ const writeFile = (
  * Writes a text file on a given path.
  * @param path
  * @param data
+ * @throws
+ * - FILE_CONTENT_IS_EMPTY_OR_INVALID: if data is not a valid string.
  */
 const writeTextFile = (path: string, data: string): void => {
   if (typeof data !== 'string' || !data.length) {
@@ -207,8 +209,10 @@ const writeTextFile = (path: string, data: string): void => {
  * @param path
  * @param data
  * @param space?
+ * @throws
+ * - FILE_CONTENT_IS_EMPTY_OR_INVALID: if the JSON content cannot be stringified
  */
-const writeJSONFile = (path: string, data: object | string, space: number = 2) => {
+const writeJSONFile = (path: string, data: object | string, space: number = 2): void => {
   let fileData: string;
   try {
     fileData = typeof data === 'string' ? data : JSON.stringify(data, undefined, space);
@@ -224,6 +228,8 @@ const writeJSONFile = (path: string, data: object | string, space: number = 2) =
  * @param path
  * @param options?
  * @returns string | Buffer
+ * @throws
+ * - NOT_A_FILE: if the path is not recognized by the OS as a file or if it doesn't exist
  */
 const readFile = (path: string, options: IReadFileOptions = null): string | Buffer => {
   if (!isFile(path)) {
@@ -236,6 +242,9 @@ const readFile = (path: string, options: IReadFileOptions = null): string | Buff
  * Reads a text file and returns its contents. Throws if the file doesn't exist or is empty/invalid.
  * @param path
  * @returns string
+ * @throws
+ * - NOT_A_FILE: if the path is not recognized by the OS as a file or if it doesn't exist
+ * - FILE_CONTENT_IS_EMPTY_OR_INVALID: if the content of the file is empty or invalid
  */
 const readTextFile = (path: string): string => {
   const content = readFile(path, { encoding: 'utf8' });
@@ -249,6 +258,9 @@ const readTextFile = (path: string): string => {
  * Reads a text file and returns its contents. Throws if the file doesn't exist or is empty/invalid.
  * @param path
  * @returns object
+ * @throws
+ * - FILE_CONTENT_IS_EMPTY_OR_INVALID: if the content of the file is empty or invalid
+ * - FILE_CONTENT_IS_EMPTY_OR_INVALID: if the file's JSON content cannot be parsed
  */
 const readJSONFile = (path: string): object => {
   const content = readTextFile(path);
@@ -264,6 +276,8 @@ const readJSONFile = (path: string): object => {
  * srcPath doesn't exist or is not considered a file by the OS.
  * @param srcPath
  * @param destPath
+ * @throws
+ * - NOT_A_FILE: if the srcPath doesnt exist or is not recognized as a file by the OS
  */
 const copyFile = (srcPath: string, destPath: string) => {
   if (!isFile(srcPath)) {
@@ -276,6 +290,8 @@ const copyFile = (srcPath: string, destPath: string) => {
  * Deletes the file located at the provided path. Throws if the file does not exist or if it isn't
  * considered a file by the OS.
  * @param path
+ * @throws
+ * - NOT_A_FILE: if the path doesnt exist or is not recognized as a file by the OS
  */
 const deleteFile = (path: string) => {
   if (!isFile(path)) {
@@ -289,6 +305,9 @@ const deleteFile = (path: string) => {
  * not considered to be a file by the OS.
  * @param target
  * @param path
+ * @throws
+ * - NON_EXISTENT_FILE: if the target file does not exist
+ * - NOT_A_FILE: if the path is not recognized as a file by the OS
  */
 const createFileSymLink = (target: string, path: string) => {
   const el = getPathElement(target);
