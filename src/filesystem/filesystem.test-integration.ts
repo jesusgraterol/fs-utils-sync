@@ -20,6 +20,7 @@ import {
   readDirectory,
   readBufferFile,
   writeBufferFile,
+  getDirectoryElements,
 } from './filesystem.js';
 import { ERRORS } from './filesystem.errors.js';
 
@@ -234,15 +235,58 @@ describe('Filesystem', () => {
     });
 
     describe('getDirectoryElements', () => {
-      test.todo('throws if attempting to read a non-existent directory');
+      test('throws if attempting to read a non-existent directory', () => {
+        expect(() => getDirectoryElements(p())).toThrowError(ERRORS.NOT_A_DIRECTORY);
+      });
 
-      test.todo('can read the directory elements separated by directories, files & symlinks');
+      test('reading an empty directory returns empty element lists', () => {
+        createDirectory(p());
+        expect(getDirectoryElements(p())).toStrictEqual({
+          directories: [],
+          files: [],
+          symbolicLinks: [],
+        });
+      });
 
-      test.todo('can filter files by any number of extensions');
+      test('can read the directory elements separated by directories, files & symlinks', () => {
+        createDirectory(p('some-dir'));
+        createDirectory(p('another-dir'));
+        createDirectorySymLink(p('some-dir'), p('some-dir-sl'));
+        writeTextFile(p('afile.txt'), 'Hello there!');
+        writeJSONFile(p('aafile.json'), { foo: 'bar' });
+        createFileSymLink(p('aafile.json'), p('aafile-sl.json'));
+        expect(getDirectoryElements(p())).toStrictEqual({
+          directories: [
+            getPathElement(p('another-dir')),
+            getPathElement(p('some-dir')),
+          ],
+          files: [
+            getPathElement(p('aafile.json')),
+            getPathElement(p('afile.txt')),
+          ],
+          symbolicLinks: [
+            getPathElement(p('aafile-sl.json')),
+            getPathElement(p('some-dir-sl')),
+          ],
+        });
+      });
 
-      test.todo('can sort elements by creation ascendingly');
-
-      test.todo('can sort elements by creation descendingly');
+      test('can filter files by any number of extensions', () => {
+        writeTextFile(p('afile.txt'), 'Hello there!');
+        writeJSONFile(p('abfile.json'), { baz: 'foo' });
+        writeJSONFile(p('aafile.json'), { foo: 'bar' });
+        writeTextFile(p('ajsfile.js'), 'console.log(\'Hello JS World!\')');
+        writeTextFile(p('atsfile.ts'), 'console.log(\'Hello TS World!\')');
+        expect(getDirectoryElements(p(), { includeExts: ['.json', '.ts'] })).toStrictEqual({
+          directories: [],
+          files: [
+            getPathElement(p('aafile.json')),
+            getPathElement(p('abfile.json')),
+            getPathElement(p('atsfile.ts')),
+          ],
+          symbolicLinks: [],
+        });
+      });
     });
   });
 

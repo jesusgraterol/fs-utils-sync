@@ -157,7 +157,7 @@ $ npm run test:integration
 
 ## @TODOS
 
-- [ ] Upgrade the package's documentation
+- [ ] Upgrade the docs
 - [ ] Implement and test `compressDirectory` and `decompressDirectory`
 - [ ] Implement and test `compressFile` and `decompressFile`
 
