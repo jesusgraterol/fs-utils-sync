@@ -24,7 +24,7 @@ import {
   IReadFileOptions,
 } from './types.js';
 import { ERRORS } from './filesystem.errors.js';
-import { buildDirectoryElementsOptions } from './filesystem.utils.js';
+import { buildDirectoryElementsOptions, getDirectoryElementsSortFunc } from './filesystem.utils.js';
 
 /* ************************************************************************************************
  *                                        GENERAL ACTIONS                                         *
@@ -150,22 +150,24 @@ const createDirectorySymLink = (target: string, path: string): void => {
 /**
  * Reads the contents of a directory based on the provided options and returns them.
  * @param path
- * @returns string[] | Buffer[]
+ * @param recursive?
+ * @returns string[]
  * @throws
  * - NOT_A_DIRECTORY: if the directory is not considered a directory by the OS.
  */
-const readDirectory = (
-  path: string,
-  options: IReadDirectoryOptions = { encoding: 'utf-8', recursive: true },
-): string[] | Buffer[] => {
+const readDirectory = (path: string, recursive: boolean = false): string[] => {
   if (!isDirectory(path)) {
     throw new Error(encodeError(`The dir '${path}' is not a directory.`, ERRORS.NOT_A_DIRECTORY));
   }
-  return readdirSync(path, options).map((contentPath) => `${path}/${contentPath}`);
+  return readdirSync(
+    path,
+    <IReadDirectoryOptions>{ encoding: 'utf8', recursive },
+  ).map((contentPath) => `${path}/${contentPath}`);
 };
 
 /**
  * Retrieves all the path elements in the given directory based on the provided options.
+ * IMPORTANT: if the includeExts option is provided, make sure to lowercase all extensions.
  * @param path
  * @param options?
  * @returns IDirectoryPathElements
@@ -183,9 +185,31 @@ const getDirectoryElements = (
   const opts = buildDirectoryElementsOptions(options);
 
   // init the lists
-  let directories: IPathElement[] = [];
-  let files: IPathElement[] = [];
-  let symbolicLinks: IPathElement[] = [];
+  const directories: IPathElement[] = [];
+  const files: IPathElement[] = [];
+  const symbolicLinks: IPathElement[] = [];
+
+  // read the directory contents and retrieve the path elements
+  const els: IPathElement[] = readDirectory(path).map((p) => <IPathElement>getPathElement(p));
+
+  // distribute the els accordingly and apply the file filter (if any)
+  els.forEach((el: IPathElement) => {
+    if (el.isDirectory) {
+      directories.push(el);
+    } else if (el.isFile && (
+      !opts.includeExts.length
+      || opts.includeExts.includes(el.extName.toLowerCase())
+    )) {
+      files.push(el);
+    } else if (el.isSymbolicLink) {
+      symbolicLinks.push(el);
+    }
+  });
+
+  // sort the elements according to the provided options
+  directories.sort(getDirectoryElementsSortFunc(opts.sortByKey, opts.sortOrder));
+  files.sort(getDirectoryElementsSortFunc(opts.sortByKey, opts.sortOrder));
+  symbolicLinks.sort(getDirectoryElementsSortFunc(opts.sortByKey, opts.sortOrder));
 
   // finally, return the elements build
   return { directories, files, symbolicLinks };

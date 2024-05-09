@@ -1,4 +1,3 @@
-import { ObjectEncodingOptions } from 'node:fs';
 
 /* ************************************************************************************************
  *                                          CORE TYPES                                            *
@@ -43,10 +42,11 @@ interface IPathElement {
  * Read Directory Options
  * The options that can be provided to the readdirSync function to determine the output's format.
  */
-type IReadDirectoryOptions = (ObjectEncodingOptions & {
+type IReadDirectoryOptions = {
+  encoding: BufferEncoding | null;
   withFileTypes?: false | undefined;
   recursive?: boolean | undefined;
-}) | BufferEncoding | null;
+} | BufferEncoding | null;
 
 
 

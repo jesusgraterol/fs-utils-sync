@@ -77,7 +77,9 @@ getPathElement('project/some-file.json');
 
 #### `createDirectorySymLink(target: string, path: string): void`
 
-#### `readDirectory(path: string, options?: IReadDirectoryOptions)`
+#### `readDirectory(path: string, recursive?: boolean): string[]`
+
+#### `getDirectoryElements(path: string, options?: Partial<IDirectoryElementsOptions>): IDirectoryPathElements`
 
 
 ### File Actions

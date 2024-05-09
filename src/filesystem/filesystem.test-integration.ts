@@ -220,7 +220,7 @@ describe('Filesystem', () => {
         writeTextFile(p('inner/inner-01.txt'), 'Hello There!! inner/01');
         writeJSONFile(p('inner/inner-02.json'), { foo: 'bar' });
         createDirectory(p('inner/inner2'));
-        expect(readDirectory(p())).toEqual([
+        expect(readDirectory(p(), true)).toEqual([
           p('file-01.txt'),
           p('file-02.txt'),
           p('file-03.json'),
@@ -231,6 +231,18 @@ describe('Filesystem', () => {
           p('inner/inner2'),
         ]);
       });
+    });
+
+    describe('getDirectoryElements', () => {
+      test.todo('throws if attempting to read a non-existent directory');
+
+      test.todo('can read the directory elements separated by directories, files & symlinks');
+
+      test.todo('can filter files by any number of extensions');
+
+      test.todo('can sort elements by creation ascendingly');
+
+      test.todo('can sort elements by creation descendingly');
     });
   });
 
