@@ -175,12 +175,12 @@ const isFile = (path: string): boolean => {
  * Creates the base directory for a file in case it doesn't exist and then it writes the file.
  * @param path
  * @param data
- * @param options
+ * @param options?
  */
 const writeFile = (
   path: string,
   data: string | NodeJS.ArrayBufferView,
-  options: WriteFileOptions | undefined,
+  options?: WriteFileOptions,
 ): void => {
   const dirName = dirname(path);
   if (!pathExists(dirName)) {
@@ -223,8 +223,22 @@ const writeJSONFile = (path: string, data: object | string, space: number = 2): 
 };
 
 /**
- * Reads and returns the contents of a file. Throws an error if the file does not exist or if it
- * is not considered a file by the OS.
+ * Writes a Buffer file on a given path.
+ * @param path
+ * @param data
+ * @throws
+ * - FILE_CONTENT_IS_EMPTY_OR_INVALID: if the provided data is not a valid Buffer
+ */
+const writeBufferFile = (path: string, data: Buffer): void => {
+  if (!Buffer.isBuffer(data)) {
+    console.log(data);
+    throw new Error(encodeError(`The provided data is not a valid Buffer. Received: ${data}`, ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID));
+  }
+  writeFile(path, data);
+};
+
+/**
+ * Reads and returns the contents of a file.
  * @param path
  * @param options?
  * @returns string | Buffer
@@ -239,7 +253,7 @@ const readFile = (path: string, options: IReadFileOptions = null): string | Buff
 };
 
 /**
- * Reads a text file and returns its contents. Throws if the file doesn't exist or is empty/invalid.
+ * Reads a text file and returns its contents.
  * @param path
  * @returns string
  * @throws
@@ -255,10 +269,11 @@ const readTextFile = (path: string): string => {
 };
 
 /**
- * Reads a text file and returns its contents. Throws if the file doesn't exist or is empty/invalid.
+ * Reads a text file and returns its contents.
  * @param path
  * @returns object
  * @throws
+ * - NOT_A_FILE: if the path is not recognized by the OS as a file or if it doesn't exist
  * - FILE_CONTENT_IS_EMPTY_OR_INVALID: if the content of the file is empty or invalid
  * - FILE_CONTENT_IS_EMPTY_OR_INVALID: if the file's JSON content cannot be parsed
  */
@@ -272,8 +287,23 @@ const readJSONFile = (path: string): object => {
 };
 
 /**
- * Copies a file from srcPath to destPath, replacing the destination if it exists. Throws if the
- * srcPath doesn't exist or is not considered a file by the OS.
+ * Reads a Buffer file and returns its contents.
+ * @param path
+ * @returns Buffer
+ * @throws
+ * - NOT_A_FILE: if the path is not recognized by the OS as a file or if it doesn't exist
+ * - FILE_CONTENT_IS_EMPTY_OR_INVALID: if the content of the file is empty or is not a Buffer
+ */
+const readBufferFile = (path: string): Buffer => {
+  const content = readFile(path, null);
+  if (!Buffer.isBuffer(content) || !content.toString().length) {
+    throw new Error(encodeError(`The file '${path}' is not a valid Buffer. Received: ${content}`, ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID));
+  }
+  return content;
+};
+
+/**
+ * Copies a file from srcPath to destPath, replacing the destination if it exists.
  * @param srcPath
  * @param destPath
  * @throws
@@ -287,8 +317,7 @@ const copyFile = (srcPath: string, destPath: string) => {
 };
 
 /**
- * Deletes the file located at the provided path. Throws if the file does not exist or if it isn't
- * considered a file by the OS.
+ * Deletes the file located at the provided path.
  * @param path
  * @throws
  * - NOT_A_FILE: if the path doesnt exist or is not recognized as a file by the OS
@@ -301,8 +330,7 @@ const deleteFile = (path: string) => {
 };
 
 /**
- * Creates a symlink for a given file. It throws if the target file doesnt exist or if it is
- * not considered to be a file by the OS.
+ * Creates a symlink for a given file.
  * @param target
  * @param path
  * @throws
@@ -343,9 +371,11 @@ export {
   writeFile,
   writeTextFile,
   writeJSONFile,
+  writeBufferFile,
   readFile,
   readTextFile,
   readJSONFile,
+  readBufferFile,
   copyFile,
   deleteFile,
   createFileSymLink,

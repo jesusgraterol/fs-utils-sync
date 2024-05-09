@@ -1,4 +1,5 @@
 import { describe, beforeAll, afterAll, beforeEach, afterEach, test, expect } from 'vitest';
+import { Buffer } from 'node:buffer';
 import { writeFileSync } from 'node:fs';
 import {
   deleteDirectory,
@@ -17,6 +18,8 @@ import {
   copyFile,
   copyDirectory,
   readDirectory,
+  readBufferFile,
+  writeBufferFile,
 } from './filesystem.js';
 import { ERRORS } from './filesystem.errors.js';
 
@@ -276,17 +279,17 @@ describe('Filesystem', () => {
         expect(() => writeJSONFile(p('file.json'), '')).toThrowError(ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID);
       });
 
-      test('can write and read a json file by providing a string', () => {
+      test('can write and read a JSON file by providing a string', () => {
         writeJSONFile(p('file.json'), JSON.stringify({ foo: 'bar', baz: true, tan: 123 }));
         expect(readJSONFile(p('file.json'))).toStrictEqual({ foo: 'bar', baz: true, tan: 123 });
       });
 
-      test('can write and read a json file by providing an object', () => {
+      test('can write and read a JSON file by providing an object', () => {
         writeJSONFile(p('file.json'), { foo: 'bar', baz: true, tan: 123 });
         expect(readJSONFile(p('file.json'))).toStrictEqual({ foo: 'bar', baz: true, tan: 123 });
       });
 
-      test('attempting to read a json file that doesnt exist throws an error', () => {
+      test('attempting to read a JSON file that doesnt exist throws an error', () => {
         expect(() => readJSONFile(p('file.json'))).toThrowError(ERRORS.NOT_A_FILE);
       });
 
@@ -294,6 +297,29 @@ describe('Filesystem', () => {
         createDirectory(p());
         writeFileSync(p('file.json'), '', { encoding: 'utf-8' });
         expect(() => readJSONFile(p('file.json'))).toThrowError(ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID);
+      });
+    });
+
+    describe('writeBufferFile & readBufferFile', () => {
+      test('attempting to write an empty or invalid file throws an error', () => {
+        // @ts-ignore
+        expect(() => writeBufferFile(p('file'), undefined)).toThrowError(ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID);
+      });
+
+      test('can write and read a Buffer file', () => {
+        const file = Buffer.from('This is a Buffer File!');
+        writeBufferFile(p('file'), file);
+        expect(readBufferFile(p('file')).toString()).toBe('This is a Buffer File!');
+      });
+
+      test('attempting to read a Buffer file that doesnt exist throws an error', () => {
+        expect(() => readBufferFile(p('file'))).toThrowError(ERRORS.NOT_A_FILE);
+      });
+
+      test('attempting to read an empty/invalid Buffer file throws an error', () => {
+        createDirectory(p());
+        writeFileSync(p('file'), '', { encoding: 'utf-8' });
+        expect(() => readBufferFile(p('file'))).toThrowError(ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID);
       });
     });
 
