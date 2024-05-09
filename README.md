@@ -59,54 +59,54 @@ getPathElement('project/some-file.json');
 
 ### General Actions
 
-#### `pathExists(path: string): boolean`
+- `pathExists(path: string): boolean`
 
-#### `getPathElement(path: string): IPathElement | null`
+- `getPathElement(path: string): IPathElement | null`
 
 
 
 ### Directory Actions
 
-#### `isDirectory(path: string): boolean`
+- `isDirectory(path: string): boolean`
 
-#### `deleteDirectory(path: string): void`
+- `deleteDirectory(path: string): void`
 
-#### `createDirectory(path: string, deleteIfExists?: boolean): void`
+- `createDirectory(path: string, deleteIfExists?: boolean): void`
 
-#### `copyDirectory(srcPath: string, destPath: string): void`
+- `copyDirectory(srcPath: string, destPath: string): void`
 
-#### `createDirectorySymLink(target: string, path: string): void`
+- `createDirectorySymLink(target: string, path: string): void`
 
-#### `readDirectory(path: string, recursive?: boolean): string[]`
+- `readDirectory(path: string, recursive?: boolean): string[]`
 
-#### `getDirectoryElements(path: string, options?: Partial<IDirectoryElementsOptions>): IDirectoryPathElements`
+- `getDirectoryElements(path: string, options?: Partial<IDirectoryElementsOptions>): IDirectoryPathElements`
 
 
 ### File Actions
 
-#### `isFile(path: string): boolean`
+- `isFile(path: string): boolean`
 
-#### `writeFile(path: string, data: string | NodeJS.ArrayBufferView, options?: WriteFileOptions): void`
+- `writeFile(path: string, data: string | NodeJS.ArrayBufferView, options?: WriteFileOptions): void`
 
-#### `writeTextFile(path: string, data: string): void`
+- `writeTextFile(path: string, data: string): void`
 
-#### `writeJSONFile(path: string, data: object | string, space?: number): void`
+- `writeJSONFile(path: string, data: object | string, space?: number): void`
 
-#### `writeBufferFile(path: string, data: Buffer): void`
+- `writeBufferFile(path: string, data: Buffer): void`
 
-#### `readFile(path: string, options?: IReadFileOptions): string | Buffer`
+- `readFile(path: string, options?: IReadFileOptions): string | Buffer`
 
-#### `readTextFile(path: string): string`
+- `readTextFile(path: string): string`
 
-#### `readJSONFile(path: string): object`
+- `readJSONFile(path: string): object`
 
-#### `readBufferFile(path: string): Buffer`
+- `readBufferFile(path: string): Buffer`
 
-#### `copyFile(srcPath: string, destPath: string): void`
+- `copyFile(srcPath: string, destPath: string): void`
 
-#### `deleteFile(path: string): void`
+- `deleteFile(path: string): void`
 
-#### `createFileSymLink(target: string, path: string)`
+- `createFileSymLink(target: string, path: string)`
 
 <br/>
 
