@@ -64,6 +64,8 @@ const getPathElement = (path: string): IPathElement | null => {
 
 
 
+
+
 /* ************************************************************************************************
  *                                       DIRECTORY ACTIONS                                        *
  ************************************************************************************************ */
@@ -154,6 +156,8 @@ const readDirectory = (
   }
   return readdirSync(path, options).map((contentPath) => `${path}/${contentPath}`);
 };
+
+
 
 
 
@@ -309,7 +313,7 @@ const readBufferFile = (path: string): Buffer => {
  * @throws
  * - NOT_A_FILE: if the srcPath doesnt exist or is not recognized as a file by the OS
  */
-const copyFile = (srcPath: string, destPath: string) => {
+const copyFile = (srcPath: string, destPath: string): void => {
   if (!isFile(srcPath)) {
     throw new Error(encodeError(`The file '${srcPath}' is not a file.`, ERRORS.NOT_A_FILE));
   }
@@ -322,7 +326,7 @@ const copyFile = (srcPath: string, destPath: string) => {
  * @throws
  * - NOT_A_FILE: if the path doesnt exist or is not recognized as a file by the OS
  */
-const deleteFile = (path: string) => {
+const deleteFile = (path: string): void => {
   if (!isFile(path)) {
     throw new Error(encodeError(`The file '${path} is not a file.'`, ERRORS.NOT_A_FILE));
   }
@@ -347,6 +351,8 @@ const createFileSymLink = (target: string, path: string) => {
   }
   symlinkSync(target, path, 'file');
 };
+
+
 
 
 
