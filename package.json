@@ -1,15 +1,17 @@
 {
   "name": "fs-utils-sync",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Streamline synchronous file system interactions in your Node.js projects with the lightweight fs-utils-sync package. It provides a collection of well-defined utility functions that enforce consistency across projects, ensuring an unified approach to file system operations.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
-    "start": "ts-lib-builder --tsconfigPath=tsconfig.build.json",
+    "start": "ts-lib-builder --tsconfig=tsconfig.build.json",
     "test": "echo \"Error: tests are executed with  npm run test:(integration|unit)\" && exit 1",
     "test:integration": "vitest run --config vitest.test-integration.config.ts",
-    "test:unit": "vitest run --config vitest.test-unit.config.ts"
+    "test:unit": "vitest run --config vitest.test-unit.config.ts",
+    "watch-test:integration": "vitest run --config vitest.test-integration.config.ts",
+    "watch-test:unit": "vitest run --config vitest.test-unit.config.ts"
   },
   "repository": {
     "type": "git",
@@ -38,11 +40,11 @@
     "@typescript-eslint/eslint-plugin": "^7.8.0",
     "@typescript-eslint/parser": "^7.8.0",
     "eslint-config-airbnb-typescript": "^18.0.0",
-    "ts-lib-builder": "^1.0.2",
+    "ts-lib-builder": "^1.0.3",
     "typescript": "^5.4.5",
     "vitest": "^1.6.0"
   },
   "dependencies": {
-    "error-message-utils": "^1.0.0"
+    "error-message-utils": "^1.0.2"
   }
 }
