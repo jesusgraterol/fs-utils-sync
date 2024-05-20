@@ -22,9 +22,9 @@ import {
   IDirectoryElementsOptions,
   IDirectoryPathElements,
   IReadFileOptions,
-} from './types.js';
-import { ERRORS } from './filesystem.errors.js';
-import { buildDirectoryElementsOptions, getDirectoryElementsSortFunc } from './filesystem.utils.js';
+  ERRORS,
+} from '../shared/index.js';
+import { buildDirectoryElementsOptions, getDirectoryElementsSortFunc } from '../utils/index.js';
 
 /* ************************************************************************************************
  *                                        GENERAL ACTIONS                                         *

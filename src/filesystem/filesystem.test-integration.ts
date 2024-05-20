@@ -1,6 +1,7 @@
 import { describe, beforeAll, afterAll, beforeEach, afterEach, test, expect } from 'vitest';
 import { Buffer } from 'node:buffer';
 import { writeFileSync } from 'node:fs';
+import { ERRORS } from '../shared/index.js';
 import {
   deleteDirectory,
   pathExists,
@@ -22,7 +23,6 @@ import {
   writeBufferFile,
   getDirectoryElements,
 } from './filesystem.js';
-import { ERRORS } from './filesystem.errors.js';
 
 /* ************************************************************************************************
  *                                           CONSTANTS                                            *
