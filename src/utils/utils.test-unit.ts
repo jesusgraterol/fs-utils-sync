@@ -1,21 +1,10 @@
 import { describe, beforeAll, afterAll, beforeEach, afterEach, test, expect } from 'vitest';
-import { IDirectoryElementsOptions, IPathElement } from './types.js';
+import { IDirectoryElementsOptions, IPathElement } from '../shared/index.js';
 import {
   DIRECTORY_ELEMENTS_DEFAULT_OPTIONS,
   buildDirectoryElementsOptions,
   getDirectoryElementsSortFunc,
-} from './filesystem.utils.js';
-
-
-/* ************************************************************************************************
- *                                           CONSTANTS                                            *
- ************************************************************************************************ */
-
-// ...
-
-
-
-
+} from './utils.js';
 
 /* ************************************************************************************************
  *                                            HELPERS                                             *
@@ -23,6 +12,8 @@ import {
 
 // builds a mock element based on the provided partial
 const buildEl = (el: Partial<IPathElement>): IPathElement => <IPathElement>el;
+
+
 
 
 

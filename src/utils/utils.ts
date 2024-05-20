@@ -3,7 +3,7 @@ import {
   IDirectoryElementsOptions,
   IDirectoryElementsSortOrder,
   IPathElement,
-} from './types.js';
+} from '../shared/index.js';
 
 /* ************************************************************************************************
  *                                           CONSTANTS                                            *
