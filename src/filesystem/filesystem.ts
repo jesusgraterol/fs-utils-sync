@@ -17,6 +17,7 @@ import {
 import { basename, extname, dirname } from 'node:path';
 import { encodeError, extractMessage } from 'error-message-utils';
 import {
+  IObject,
   IPathElement,
   IReadDirectoryOptions,
   IDirectoryElementsOptions,
@@ -274,7 +275,7 @@ const writeTextFile = (path: string, data: string): void => {
  * @throws
  * - FILE_CONTENT_IS_EMPTY_OR_INVALID: if the JSON content cannot be stringified
  */
-const writeJSONFile = (path: string, data: object | string, space: number = 2): void => {
+const writeJSONFile = (path: string, data: IObject | string, space: number = 2): void => {
   let fileData: string;
   try {
     fileData = typeof data === 'string' ? data : JSON.stringify(data, undefined, space);
@@ -339,7 +340,7 @@ const readTextFile = (path: string): string => {
  * - FILE_CONTENT_IS_EMPTY_OR_INVALID: if the content of the file is empty or invalid
  * - FILE_CONTENT_IS_EMPTY_OR_INVALID: if the file's JSON content cannot be parsed
  */
-const readJSONFile = (path: string): object => {
+const readJSONFile = (path: string): IObject => {
   const content = readTextFile(path);
   try {
     return JSON.parse(content);

@@ -1,6 +1,6 @@
 {
   "name": "fs-utils-sync",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Streamline synchronous file system interactions in your Node.js projects with the lightweight fs-utils-sync package. It provides a collection of well-defined utility functions that enforce consistency across projects, ensuring an unified approach to file system operations.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

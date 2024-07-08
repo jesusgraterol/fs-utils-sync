@@ -5,6 +5,18 @@
  ************************************************************************************************ */
 
 /**
+ * Object
+ * This type is used to replace the original 'object' type which can become difficult to deal with.
+ */
+interface IObject {
+  [key: string]: any
+}
+
+
+
+
+
+/**
  * Path Element
  * The most relevant information regarding a path element, extracted by making use of the lstat
  * method.
@@ -115,7 +127,8 @@ type IReadFileOptions = IReadBufferFileOptions | IReadStringFileOptions;
 /* ************************************************************************************************
  *                                         MODULE EXPORTS                                         *
  ************************************************************************************************ */
-export {
+export type {
+  IObject,
   IPathElement,
   IReadDirectoryOptions,
   IDirectoryElementsKeySort,
