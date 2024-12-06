@@ -305,7 +305,7 @@ getPathElement('project/some-file.json'); // null
 <details>
   <summary><code>writeBufferFile</code></summary>
   
-  Writes a JSON file on a given path. If an object is provided, it will be stringified.
+  Writes a Buffer file on a given path. If an object is provided, it will be stringified.
   ```typescript
   import { Buffer } from 'node:buffer';
   import { writeBufferFile } from 'fs-utils-sync';
