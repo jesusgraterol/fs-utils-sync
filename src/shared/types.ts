@@ -1,4 +1,4 @@
-
+import { ISortDirection } from 'web-utils-kit';
 
 /* ************************************************************************************************
  *                                             TYPES                                              *
@@ -61,14 +61,12 @@ type IReadDirectoryOptions = {
 
 type IDirectoryElementsKeySort = 'baseName' | 'size' | 'creation';
 
-type IDirectoryElementsSortOrder = 'asc' | 'desc';
-
 type IDirectoryElementsOptions = {
   // the key that will be used to sort the elements. Defaults to 'baseName'
   sortByKey: IDirectoryElementsKeySort;
 
   // the sort order that will be applied to the elements. Defaults to 'asc'
-  sortOrder: IDirectoryElementsSortOrder;
+  sortOrder: ISortDirection;
 
   // the list of file extensions that will be included. Defaults to [] (includes all exts)
   includeExts: string[];
@@ -119,7 +117,6 @@ export type {
   IPathElement,
   IReadDirectoryOptions,
   IDirectoryElementsKeySort,
-  IDirectoryElementsSortOrder,
   IDirectoryElementsOptions,
   IDirectoryPathElements,
   IReadBufferFileOptions,

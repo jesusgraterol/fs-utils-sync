@@ -16,6 +16,7 @@ import {
 } from 'node:fs';
 import { basename, extname, dirname } from 'node:path';
 import { encodeError, extractMessage } from 'error-message-utils';
+import { sortRecords } from 'web-utils-kit';
 import {
   IPathElement,
   IReadDirectoryOptions,
@@ -24,7 +25,7 @@ import {
   IReadFileOptions,
 } from './shared/types.js';
 import { ERRORS } from './shared/errors.js';
-import { buildDirectoryElementsOptions, getDirectoryElementsSortFunc } from './utils/index.js';
+import { buildDirectoryElementsOptions } from './utils/index.js';
 
 /* ************************************************************************************************
  *                                        GENERAL ACTIONS                                         *
@@ -207,9 +208,9 @@ const getDirectoryElements = (
   });
 
   // sort the elements according to the provided options
-  directories.sort(getDirectoryElementsSortFunc(opts.sortByKey, opts.sortOrder));
-  files.sort(getDirectoryElementsSortFunc(opts.sortByKey, opts.sortOrder));
-  symbolicLinks.sort(getDirectoryElementsSortFunc(opts.sortByKey, opts.sortOrder));
+  directories.sort(sortRecords(opts.sortByKey, opts.sortOrder));
+  files.sort(sortRecords(opts.sortByKey, opts.sortOrder));
+  symbolicLinks.sort(sortRecords(opts.sortByKey, opts.sortOrder));
 
   // finally, return the elements build
   return { directories, files, symbolicLinks };

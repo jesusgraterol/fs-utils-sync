@@ -165,10 +165,12 @@ getPathElement('project/some-file.json'); // null
   import { readDirectory } from 'fs-utils-sync';
 
   readDirectory('some-dir', true);
-  // some-dir/file-01.txt
-  // some-dir/file-02.json
-  // some-dir/inner
-  // some-dir/inner/inner-01.txt
+  // [
+  //   'some-dir/file-01.txt',
+  //   'some-dir/file-02.json',
+  //   'some-dir/inner',
+  //   'some-dir/inner/inner-01.txt'
+  // ]
   ```
 </details>
 
@@ -180,10 +182,12 @@ getPathElement('project/some-file.json'); // null
   import { readDirectory } from 'fs-utils-sync';
 
   readDirectory('some-dir', true);
-  // some-dir/file-01.txt
-  // some-dir/file-02.json
-  // some-dir/inner
-  // some-dir/inner/inner-01.txt
+  // [
+  //   'some-dir/file-01.txt',
+  //   'some-dir/file-02.json',
+  //   'some-dir/inner',
+  //   'some-dir/inner/inner-01.txt'
+  // ]
   ```
 </details>
 
@@ -229,33 +233,37 @@ getPathElement('project/some-file.json'); // null
 </details>
 
 <details>
-  <summary><code>IReadDirectoryOptions</code></summary>
+  <summary><code>IDirectoryElementsOptions</code></summary>
   
-  The options that can be provided to the `readdirSync` function to determine the output's format.
+  When querying the path elements from within a directory, a series of filters and sorting options can be provided.
   ```typescript
-  type IReadDirectoryOptions = {
-    encoding: BufferEncoding | null;
-    withFileTypes?: false | undefined;
-    recursive?: boolean | undefined;
-  } | BufferEncoding | null;
+  import { ISortDirection } from 'web-utils-kit';
+
+  type IDirectoryElementsKeySort = 'baseName' | 'size' | 'creation';
+
+  type IDirectoryElementsOptions = {
+    // the key that will be used to sort the elements. Defaults to 'baseName'
+    sortByKey: IDirectoryElementsKeySort;
+
+    // the sort order that will be applied to the elements. Defaults to 'asc'
+    sortOrder: ISortDirection;
+
+    // the list of file extensions that will be included. Defaults to [] (includes all exts)
+    includeExts: string[];
+  };
   ```
 </details>
 
 <details>
-  <summary><code>IDirectoryElementsKeySort</code></summary>
+  <summary><code>IDirectoryPathElements</code></summary>
   
-  When querying the path elements from within a directory, a series of filters and sorting options can be provided.
+  The output emitted when retrieving all the path elements within a directory.
   ```typescript
-  type IDirectoryElementsKeySort = 'baseName' | 'size' | 'creation';
-  ```
-</details>
-
-<details>
-  <summary><code>IDirectoryElementsKeySort</code></summary>
-  
-  When querying the path elements from within a directory, a series of filters and sorting options can be provided.
-  ```typescript
-  type IDirectoryElementsKeySort = 'baseName' | 'size' | 'creation';
+  type IDirectoryPathElements = {
+    directories: IPathElement[];
+    files: IPathElement[];
+    symbolicLinks: IPathElement[];
+  };
   ```
 </details>
 
