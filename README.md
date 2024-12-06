@@ -1,8 +1,6 @@
 # Filesystem Utils Sync
 
-Streamline synchronous file system interactions in your Node.js projects with the lightweight `fs-utils-sync` package. It provides a collection of well-defined utility functions that enforce consistency across projects, ensuring an unified approach to file system operations.
-
-
+The `fs-utils-sync` package provides a collection of well-tested, synchronous file system utility functions. It promotes consistency and readability across projects by providing a unified approach to common file operations, saving you development time and improving code quality.
 
 
 
@@ -12,16 +10,10 @@ Streamline synchronous file system interactions in your Node.js projects with th
 
 Install the package:
 ```bash
-$ npm install -S fs-utils-sync
+npm install -S fs-utils-sync
 ```
 
-
-
-
-
-</br>
-
-## Usage Examples
+### Examples
 ```
 project
     │
@@ -33,7 +25,9 @@ project
 ```typescript
 import { pathExist, getPathElement } from 'fs-utils-sync';
 
+pathExists('project'); // true
 pathExists('project/some-dir'); // true
+pathExists('project/some-other-dir'); // false
 pathExists('project/some-file.json'); // true
 pathExists('project/other-file.json'); // false
 
@@ -108,6 +102,10 @@ getPathElement('project/some-file.json');
 
 - `createFileSymLink(target: string, path: string)`
 
+
+
+
+
 <br/>
 
 ## Built With
@@ -122,11 +120,11 @@ getPathElement('project/some-file.json');
 ## Running the Tests
 
 ```bash
-# Unit Tests
-$ npm run test:unit
+# unit tests
+npm run test:unit
 
-# Integration Tests
-$ npm run test:integration
+# integration tests
+npm run test:integration
 ```
 
 
@@ -145,43 +143,21 @@ $ npm run test:integration
 
 <br/>
 
-## Acknowledgments
-
-- ...
-
-
-
-
-
-<br/>
-
-## @TODOS
-
-- [ ] Upgrade the docs
-- [ ] Implement and test `compressDirectory` and `decompressDirectory`
-- [ ] Implement and test `compressFile` and `decompressFile`
-
-
-
-
-
-<br/>
-
 ## Deployment
 
 Install dependencies:
 ```bash
-$ npm install
+npm install
 ```
 
 
 Build the library:
 ```bash
-$ npm start
+npm start
 ```
 
 
 Publish to `npm`:
 ```bash
-$ npm publish
+npm publish
 ```
