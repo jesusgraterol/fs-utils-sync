@@ -1,10 +1,10 @@
 import { describe, beforeAll, afterAll, beforeEach, afterEach, test, expect } from 'vitest';
-import { IDirectoryElementsOptions, IPathElement } from '../shared/index.js';
+import { IDirectoryElementsOptions, IPathElement } from '../shared/types.js';
 import {
   DIRECTORY_ELEMENTS_DEFAULT_OPTIONS,
   buildDirectoryElementsOptions,
   getDirectoryElementsSortFunc,
-} from './utils.js';
+} from './index.js';
 
 /* ************************************************************************************************
  *                                            HELPERS                                             *

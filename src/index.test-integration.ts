@@ -1,7 +1,7 @@
-import { describe, beforeAll, afterAll, beforeEach, afterEach, test, expect } from 'vitest';
+import { describe, afterAll, beforeEach, test, expect } from 'vitest';
 import { Buffer } from 'node:buffer';
 import { writeFileSync } from 'node:fs';
-import { ERRORS } from '../shared/index.js';
+import { ERRORS } from './shared/errors.js';
 import {
   deleteDirectory,
   pathExists,
@@ -22,7 +22,7 @@ import {
   readBufferFile,
   writeBufferFile,
   getDirectoryElements,
-} from './filesystem.js';
+} from './index.js';
 
 /* ************************************************************************************************
  *                                           CONSTANTS                                            *
@@ -50,13 +50,9 @@ const p = (path?: string): string => (typeof path === 'string' ? `${BASE_PATH}/$
  *                                             TESTS                                              *
  ************************************************************************************************ */
 describe('Filesystem', () => {
-  beforeAll(() => { });
-
   afterAll(() => { deleteDirectory(p()); });
 
   beforeEach(() => { deleteDirectory(p()); });
-
-  afterEach(() => { });
 
   /* **********************************************************************************************
   *                                        GENERAL ACTIONS                                        *

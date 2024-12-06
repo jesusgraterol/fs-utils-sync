@@ -23,7 +23,7 @@ project
     some-file.json
 ```
 ```typescript
-import { pathExist, getPathElement } from 'fs-utils-sync';
+import { pathExist, getPathElement, deleteFile } from 'fs-utils-sync';
 
 pathExists('project'); // true
 pathExists('project/some-dir'); // true
@@ -43,64 +43,221 @@ getPathElement('project/some-file.json');
 //    size: 8647,
 //    creation: 1715264137289,
 // }
+
+deleteFile('project/some-file.json');
+getPathElement('project/some-file.json'); // null
 ```
 
 
 
-</br>
 
-## API
+
+<br/>
+
+## API Reference
 
 ### General Actions
 
-- `pathExists(path: string): boolean`
+<details>
+  <summary><code>pathExists</code></summary>
+  
+  Checks if a path exists (file or directory).
+  ```typescript
+  import { pathExists } from 'fs-utils-sync';
 
-- `getPathElement(path: string): IPathElement | null`
+  pathExists('some-existent-dir'); // true
+  pathExists('some-non-existent-file.json'); // false
+  ```
+</details>
 
+<details>
+  <summary><code>getPathElement</code></summary>
+  
+  Reads the content of a given path and returns the stats. If the path doesn't exist, it returns `null`
+  ```typescript
+  import { getPathElement } from 'fs-utils-sync';
 
+  getPathElement('project/some-file.json');
+  // {
+  //    path: 'project/some-file.json',
+  //    baseName: 'some-file.json',
+  //    extName: '.json',
+  //    isFile: true,
+  //    isDirectory: false,
+  //    isSymbolicLink: false,
+  //    size: 8647,
+  //    creation: 1715264137289,
+  // }
+  ```
+</details>
 
 ### Directory Actions
 
-- `isDirectory(path: string): boolean`
+<details>
+  <summary><code>isDirectory</code></summary>
+  
+  Verifies if a given path exists and is a directory.
+  ```typescript
+  import { isDirectory } from 'fs-utils-sync';
 
-- `deleteDirectory(path: string): void`
+  isDirectory('some-existent-dir'); // true
+  isDirectory('some-non-existent-dir'); // false
+  isDirectory('some-existent-file.json'); // false
+  ```
+</details>
 
-- `createDirectory(path: string, deleteIfExists?: boolean): void`
+<details>
+  <summary><code>deleteDirectory</code></summary>
+  
+  Deletes the directory located in the given path.
+  ```typescript
+  import { isDirectory, deleteDirectory } from 'fs-utils-sync';
 
-- `copyDirectory(srcPath: string, destPath: string): void`
+  isDirectory('some-existent-dir'); // true
+  deleteDirectory('some-non-existent-dir');
+  isDirectory('some-existent-dir'); // false
+  ```
+</details>
 
-- `createDirectorySymLink(target: string, path: string): void`
+<details>
+  <summary><code>createDirectory</code></summary>
+  
+  Creates a directory at a given path.
+  ```typescript
+  import { isDirectory, createDirectory } from 'fs-utils-sync';
 
-- `readDirectory(path: string, recursive?: boolean): string[]`
+  isDirectory('some-dir'); // false
+  createDirectory('some-dir');
+  isDirectory('some-dir'); // true
+  ```
+</details>
 
-- `getDirectoryElements(path: string, options?: Partial<IDirectoryElementsOptions>): IDirectoryPathElements`
+<details>
+  <summary><code>copyDirectory</code></summary>
+  
+  It copies a directory (and sub directories) from `srcPath` to `destPath`. Keep in mind the `destPath` is completely overridden.
+  ```typescript
+  import { isDirectory, copyDirectory } from 'fs-utils-sync';
+
+  isDirectory('some-dir'); // true
+  isDirectory('my-copy'); // false
+  copyDirectory('some-dir', 'my-copy');
+  isDirectory('my-copy'); // true
+  ```
+</details>
+
+<details>
+  <summary><code>createDirectorySymLink</code></summary>
+  
+  Creates a symlink for the `target` directory at `path`.
+  ```typescript
+  import { createDirectorySymLink } from 'fs-utils-sync';
+
+  createDirectorySymLink('some-dir', 'some-dir-symlink');
+  ```
+</details>
+
+<details>
+  <summary><code>readDirectory</code></summary>
+  
+  Reads the contents of a directory based on the provided options and returns them.
+  ```typescript
+  import { readDirectory } from 'fs-utils-sync';
+
+  readDirectory('some-dir', true);
+  // some-dir/file-01.txt
+  // some-dir/file-02.json
+  // some-dir/inner
+  // some-dir/inner/inner-01.txt
+  ```
+</details>
+
+<details>
+  <summary><code>getDirectoryElements</code></summary>
+  
+  Reads the contents of a directory based on the provided options and returns them.
+  ```typescript
+  import { readDirectory } from 'fs-utils-sync';
+
+  readDirectory('some-dir', true);
+  // some-dir/file-01.txt
+  // some-dir/file-02.json
+  // some-dir/inner
+  // some-dir/inner/inner-01.txt
+  ```
+</details>
 
 
-### File Actions
 
-- `isFile(path: string): boolean`
 
-- `writeFile(path: string, data: string | NodeJS.ArrayBufferView, options?: WriteFileOptions): void`
 
-- `writeTextFile(path: string, data: string): void`
+<br/>
 
-- `writeJSONFile(path: string, data: object | string, space?: number): void`
+## Types
 
-- `writeBufferFile(path: string, data: Buffer): void`
+<details>
+  <summary><code>IPathElement</code></summary>
+  
+  The most relevant information regarding a path element, extracted by making use of the `lstat` function.
+  ```typescript
+  interface IPathElement {
+    // the relative path of the el
+    path: string;
 
-- `readFile(path: string, options?: IReadFileOptions): string | Buffer`
+    // the base name of the el
+    baseName: string;
 
-- `readTextFile(path: string): string`
+    // the ext of the el (e.g '.json'). If the el has no ext, it will be an empty string ('')
+    extName: string;
 
-- `readJSONFile(path: string): object`
+    // true if the el is a file
+    isFile: boolean;
 
-- `readBufferFile(path: string): Buffer`
+    // true if the el is a directory
+    isDirectory: boolean;
 
-- `copyFile(srcPath: string, destPath: string): void`
+    // true if the el is a symbolic link
+    isSymbolicLink: boolean; // when this property is true, isFile & isDirectory are false
 
-- `deleteFile(path: string): void`
+    // the size in bytes of the el
+    size: number;
 
-- `createFileSymLink(target: string, path: string)`
+    // the date in which the el was created (in milliseconds)
+    creation: number;
+  }
+  ```
+</details>
+
+<details>
+  <summary><code>IReadDirectoryOptions</code></summary>
+  
+  The options that can be provided to the `readdirSync` function to determine the output's format.
+  ```typescript
+  type IReadDirectoryOptions = {
+    encoding: BufferEncoding | null;
+    withFileTypes?: false | undefined;
+    recursive?: boolean | undefined;
+  } | BufferEncoding | null;
+  ```
+</details>
+
+<details>
+  <summary><code>IDirectoryElementsKeySort</code></summary>
+  
+  When querying the path elements from within a directory, a series of filters and sorting options can be provided.
+  ```typescript
+  type IDirectoryElementsKeySort = 'baseName' | 'size' | 'creation';
+  ```
+</details>
+
+<details>
+  <summary><code>IDirectoryElementsKeySort</code></summary>
+  
+  When querying the path elements from within a directory, a series of filters and sorting options can be provided.
+  ```typescript
+  type IDirectoryElementsKeySort = 'baseName' | 'size' | 'creation';
+  ```
+</details>
 
 
 
