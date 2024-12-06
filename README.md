@@ -177,17 +177,222 @@ getPathElement('project/some-file.json'); // null
 <details>
   <summary><code>getDirectoryElements</code></summary>
   
-  Reads the contents of a directory based on the provided options and returns them.
+  Retrieves all the path elements in the given directory based on the provided options. 
+  IMPORTANT: if the `includeExts` option is provided, make sure to lowercase all extensions (e.g `'.json'`).
   ```typescript
-  import { readDirectory } from 'fs-utils-sync';
+  import { getDirectoryElements } from 'fs-utils-sync';
 
-  readDirectory('some-dir', true);
-  // [
-  //   'some-dir/file-01.txt',
-  //   'some-dir/file-02.json',
-  //   'some-dir/inner',
-  //   'some-dir/inner/inner-01.txt'
-  // ]
+  getDirectoryElements('fs-test-dir');
+  // {
+  //   directories: [
+  //     {
+  //       path: 'fs-test-dir/another-dir',
+  //       baseName: 'another-dir',
+  //       extName: '',
+  //       isFile: false,
+  //       isDirectory: true,
+  //       isSymbolicLink: false,
+  //       size: 4096,
+  //       creation: 1733515026497
+  //     },
+  //     {
+  //       path: 'fs-test-dir/some-dir',
+  //       baseName: 'some-dir',
+  //       extName: '',
+  //       isFile: false,
+  //       isDirectory: true,
+  //       isSymbolicLink: false,
+  //       size: 4096,
+  //       creation: 1733515026497
+  //     }
+  //   ],
+  //   files: [
+  //     {
+  //       path: 'fs-test-dir/aafile.json',
+  //       baseName: 'aafile.json',
+  //       extName: '.json',
+  //       isFile: true,
+  //       isDirectory: false,
+  //       isSymbolicLink: false,
+  //       size: 18,
+  //       creation: 1733515026497
+  //     },
+  //     {
+  //       path: 'fs-test-dir/afile.txt',
+  //       baseName: 'afile.txt',
+  //       extName: '.txt',
+  //       isFile: true,
+  //       isDirectory: false,
+  //       isSymbolicLink: false,
+  //       size: 12,
+  //       creation: 1733515026497
+  //     }
+  //   ],
+  //   symbolicLinks: [
+  //     {
+  //       path: 'fs-test-dir/aafile-sl.json',
+  //       baseName: 'aafile-sl.json',
+  //       extName: '.json',
+  //       isFile: false,
+  //       isDirectory: false,
+  //       isSymbolicLink: true,
+  //       size: 23,
+  //       creation: 1733515026497
+  //     },
+  //     {
+  //       path: 'fs-test-dir/some-dir-sl',
+  //       baseName: 'some-dir-sl',
+  //       extName: '',
+  //       isFile: false,
+  //       isDirectory: false,
+  //       isSymbolicLink: true,
+  //       size: 20,
+  //       creation: 1733515026497
+  //     }
+  //   ]
+  // }
+  ```
+</details>
+
+
+### File Actions
+
+<details>
+  <summary><code>isFile</code></summary>
+  
+  Verifies if a given path exists and is a file.
+  ```typescript
+  import { isFile } from 'fs-utils-sync';
+
+  isFile('existent-file.json'); // true
+  isFile('non-existent-file.json'); // false
+  ```
+</details>
+
+<details>
+  <summary><code>writeFile</code></summary>
+  
+  Creates the base directory for a file in case it doesn't exist and then it writes the file.
+  ```typescript
+  import { writeFile } from 'fs-utils-sync';
+
+  writeFile('test-file.txt', 'Hello World!', { encoding: 'utf-8' });
+  ```
+</details>
+
+<details>
+  <summary><code>writeTextFile</code></summary>
+  
+  Writes a text file on a given path.
+  ```typescript
+  import { writeTextFile } from 'fs-utils-sync';
+
+  writeTextFile('test-file.txt', 'Hello World!');
+  ```
+</details>
+
+<details>
+  <summary><code>writeJSONFile</code></summary>
+  
+  Writes a JSON file on a given path. If an object is provided, it will be stringified.
+  ```typescript
+  import { writeJSONFile } from 'fs-utils-sync';
+
+  writeJSONFile('test-file.json', { id: 1, nickname: 'test-user' });
+  ```
+</details>
+
+<details>
+  <summary><code>writeBufferFile</code></summary>
+  
+  Writes a JSON file on a given path. If an object is provided, it will be stringified.
+  ```typescript
+  import { Buffer } from 'node:buffer';
+  import { writeBufferFile } from 'fs-utils-sync';
+
+  writeBufferFile('test-file', Buffer.from('Hello World!'));
+  ```
+</details>
+
+<details>
+  <summary><code>readFile</code></summary>
+  
+  Reads and returns the contents of a file.
+  ```typescript
+  import { readFile } from 'fs-utils-sync';
+
+  readFile('test-file.txt', { encoding: 'utf-8' }); // 'Hello World!'
+  ```
+</details>
+
+<details>
+  <summary><code>readTextFile</code></summary>
+  
+  Reads a text file and returns its contents.
+  ```typescript
+  import { readTextFile } from 'fs-utils-sync';
+
+  readTextFile('test-file.txt'); // 'Hello World!'
+  ```
+</details>
+
+<details>
+  <summary><code>readJSONFile</code></summary>
+  
+  Reads a text file, parses and returns its contents.
+  ```typescript
+  import { readJSONFile } from 'fs-utils-sync';
+
+  readJSONFile('test-file.json'); // { id: 1, nickname: 'test-user' }
+  ```
+</details>
+
+<details>
+  <summary><code>readBufferFile</code></summary>
+  
+  Reads a Buffer file and returns its contents.
+  ```typescript
+  import { readBufferFile } from 'fs-utils-sync';
+
+  readBufferFile('test-file'); // <Buffer 48 65 6c 6c 6f 20 57 6f 72 6c 64 21>
+  ```
+</details>
+
+<details>
+  <summary><code>copyFile</code></summary>
+  
+  Copies a file from `srcPath` to `destPath`, replacing the destination if it exists.
+  ```typescript
+  import { isFile, copyFile } from 'fs-utils-sync';
+
+  isFile('file-a.json'); // true
+  isFile('file-b.json'); // false
+  copyFile('file-a.json', 'file-b.json');
+  isFile('file-b.json'); // true
+  ```
+</details>
+
+<details>
+  <summary><code>deleteFile</code></summary>
+  
+  Deletes the file located at the provided `path`.
+  ```typescript
+  import { isFile, deleteFile } from 'fs-utils-sync';
+
+  isFile('file-a.json'); // true
+  deleteFile('file-a.json');
+  isFile('file-a.json'); // false
+  ```
+</details>
+
+<details>
+  <summary><code>createFileSymLink</code></summary>
+  
+  Creates a symlink for a given file.
+  ```typescript
+  import { createFileSymLink } from 'fs-utils-sync';
+
+  createFileSymLink('test-file.txt', 'test-file-symlink.txt');
   ```
 </details>
 

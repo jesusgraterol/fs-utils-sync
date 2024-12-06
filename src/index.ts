@@ -19,6 +19,7 @@ import { encodeError, extractMessage } from 'error-message-utils';
 import { sortRecords } from 'web-utils-kit';
 import {
   IPathElement,
+  IDirectoryElementsKeySort,
   IReadDirectoryOptions,
   IDirectoryElementsOptions,
   IDirectoryPathElements,
@@ -162,13 +163,14 @@ const readDirectory = (path: string, recursive: boolean = false): string[] => {
   }
   return readdirSync(
     path,
-    <IReadDirectoryOptions>{ encoding: 'utf8', recursive },
+    <IReadDirectoryOptions>{ encoding: 'utf-8', recursive },
   ).map((contentPath) => `${path}/${contentPath}`);
 };
 
 /**
  * Retrieves all the path elements in the given directory based on the provided options.
- * IMPORTANT: if the includeExts option is provided, make sure to lowercase all extensions.
+ * IMPORTANT: if the includeExts option is provided, make sure to lowercase all
+ * extensions (e.g '.json').
  * @param path
  * @param options?
  * @returns IDirectoryPathElements
@@ -326,7 +328,7 @@ const readFile = (path: string, options: IReadFileOptions = null): string | Buff
  * - FILE_CONTENT_IS_EMPTY_OR_INVALID: if the content of the file is empty or invalid
  */
 const readTextFile = (path: string): string => {
-  const content = readFile(path, { encoding: 'utf8' });
+  const content = readFile(path, { encoding: 'utf-8' });
   if (typeof content !== 'string' || !content.length) {
     throw new Error(encodeError(`The file '${path}' is empty or invalid.`, ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID));
   }
@@ -334,7 +336,7 @@ const readTextFile = (path: string): string => {
 };
 
 /**
- * Reads a text file and returns its contents.
+ * Reads a text file, parses and returns its contents.
  * @param path
  * @returns object
  * @throws
@@ -423,8 +425,7 @@ const createFileSymLink = (target: string, path: string) => {
 export {
   // types
   type IPathElement,
-
-
+  type IDirectoryElementsKeySort,
   type IDirectoryElementsOptions,
   type IDirectoryPathElements,
 
