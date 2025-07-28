@@ -31,32 +31,29 @@ import {
 // the base path that will be used for the tests
 const BASE_PATH = 'fs-test-dir';
 
-
-
-
-
 /* ************************************************************************************************
  *                                            HELPERS                                             *
  ************************************************************************************************ */
 
 // builds a path inside of the base path
-const p = (path?: string): string => (typeof path === 'string' ? `${BASE_PATH}/${path}` : BASE_PATH);
-
-
-
-
+const p = (path?: string): string =>
+  typeof path === 'string' ? `${BASE_PATH}/${path}` : BASE_PATH;
 
 /* ************************************************************************************************
  *                                             TESTS                                              *
  ************************************************************************************************ */
 describe('Filesystem', () => {
-  afterAll(() => { deleteDirectory(p()); });
+  afterAll(() => {
+    deleteDirectory(p());
+  });
 
-  beforeEach(() => { deleteDirectory(p()); });
+  beforeEach(() => {
+    deleteDirectory(p());
+  });
 
   /* **********************************************************************************************
-  *                                        GENERAL ACTIONS                                        *
-  *********************************************************************************************** */
+   *                                        GENERAL ACTIONS                                        *
+   *********************************************************************************************** */
   describe('General Actions', () => {
     describe('pathExists', () => {
       test('can determine if a path does not exist', () => {
@@ -78,7 +75,7 @@ describe('Filesystem', () => {
         expect(getPathElement(p('test-file.txt'))).toBeNull();
       });
 
-      test('can read a directory\'s element', () => {
+      test("can read a directory's element", () => {
         createDirectory(p());
         const el = getPathElement(p());
         expect(el).not.toBeNull();
@@ -92,7 +89,7 @@ describe('Filesystem', () => {
         expect(typeof el!.size).toBe('number');
       });
 
-      test('can read a file\'s element', () => {
+      test("can read a file's element", () => {
         createDirectory(p());
         writeTextFile(p('test-file.txt'), 'Hello World!!');
         const el = getPathElement(p('test-file.txt'));
@@ -109,13 +106,9 @@ describe('Filesystem', () => {
     });
   });
 
-
-
-
-
   /* **********************************************************************************************
-  *                                      DIRECTORY ACTIONS                                        *
-  *********************************************************************************************** */
+   *                                      DIRECTORY ACTIONS                                        *
+   *********************************************************************************************** */
   describe('Directory Actions', () => {
     describe('isDirectory', () => {
       test('can determine if a path is a directory', () => {
@@ -158,7 +151,10 @@ describe('Filesystem', () => {
         writeTextFile(p('dir-a/file-a.txt'), 'This is file a!');
         writeTextFile(p('dir-a/file-b.txt'), 'This is file b!');
         writeTextFile(p('dir-a/b/file-ab.txt'), 'This is file ab!');
-        writeJSONFile(p('dir-a/b/c/file-abc.json'), { name: 'file-abc.json', description: 'This is file abc!' });
+        writeJSONFile(p('dir-a/b/c/file-abc.json'), {
+          name: 'file-abc.json',
+          description: 'This is file abc!',
+        });
 
         copyDirectory(p('dir-a'), p('dir-b'));
         expect(isDirectory(p('dir-b'))).toBeTruthy();
@@ -167,7 +163,10 @@ describe('Filesystem', () => {
         expect(isDirectory(p('dir-b/b'))).toBeTruthy();
         expect(readTextFile(p('dir-b/b/file-ab.txt'))).toBe('This is file ab!');
         expect(isDirectory(p('dir-b/b/c'))).toBeTruthy();
-        expect(readJSONFile(p('dir-b/b/c/file-abc.json'))).toStrictEqual({ name: 'file-abc.json', description: 'This is file abc!' });
+        expect(readJSONFile(p('dir-b/b/c/file-abc.json'))).toStrictEqual({
+          name: 'file-abc.json',
+          description: 'This is file abc!',
+        });
       });
 
       test('can copy a directory with some files in it, overriding the destination', () => {
@@ -195,12 +194,16 @@ describe('Filesystem', () => {
       });
 
       test('throws if the target directory does not exist', () => {
-        expect(() => createDirectorySymLink(p('test-dir'), p('test-dir-symlink'))).toThrowError(ERRORS.NON_EXISTENT_DIRECTORY);
+        expect(() => createDirectorySymLink(p('test-dir'), p('test-dir-symlink'))).toThrowError(
+          ERRORS.NON_EXISTENT_DIRECTORY,
+        );
       });
 
       test('throws if the target directory is not a directory', () => {
         writeTextFile(p('some-file.txt'), 'Hello World!');
-        expect(() => createDirectorySymLink(p('some-file.txt'), p('test-dir-symlink'))).toThrowError(ERRORS.NOT_A_DIRECTORY);
+        expect(() =>
+          createDirectorySymLink(p('some-file.txt'), p('test-dir-symlink')),
+        ).toThrowError(ERRORS.NOT_A_DIRECTORY);
       });
     });
 
@@ -252,18 +255,9 @@ describe('Filesystem', () => {
         writeJSONFile(p('aafile.json'), { foo: 'bar' });
         createFileSymLink(p('aafile.json'), p('aafile-sl.json'));
         expect(getDirectoryElements(p())).toStrictEqual({
-          directories: [
-            getPathElement(p('another-dir')),
-            getPathElement(p('some-dir')),
-          ],
-          files: [
-            getPathElement(p('aafile.json')),
-            getPathElement(p('afile.txt')),
-          ],
-          symbolicLinks: [
-            getPathElement(p('aafile-sl.json')),
-            getPathElement(p('some-dir-sl')),
-          ],
+          directories: [getPathElement(p('another-dir')), getPathElement(p('some-dir'))],
+          files: [getPathElement(p('aafile.json')), getPathElement(p('afile.txt'))],
+          symbolicLinks: [getPathElement(p('aafile-sl.json')), getPathElement(p('some-dir-sl'))],
         });
       });
 
@@ -271,8 +265,8 @@ describe('Filesystem', () => {
         writeTextFile(p('afile.txt'), 'Hello there!');
         writeJSONFile(p('abfile.json'), { baz: 'foo' });
         writeJSONFile(p('aafile.json'), { foo: 'bar' });
-        writeTextFile(p('ajsfile.js'), 'console.log(\'Hello JS World!\')');
-        writeTextFile(p('atsfile.ts'), 'console.log(\'Hello TS World!\')');
+        writeTextFile(p('ajsfile.js'), "console.log('Hello JS World!')");
+        writeTextFile(p('atsfile.ts'), "console.log('Hello TS World!')");
         expect(getDirectoryElements(p(), { includeExts: ['.json', '.ts'] })).toStrictEqual({
           directories: [],
           files: [
@@ -286,13 +280,9 @@ describe('Filesystem', () => {
     });
   });
 
-
-
-
-
   /* **********************************************************************************************
-  *                                          FILE ACTIONS                                         *
-  *********************************************************************************************** */
+   *                                          FILE ACTIONS                                         *
+   *********************************************************************************************** */
   describe('File Actions', () => {
     describe('isFile', () => {
       test('can determine if a path is a file', () => {
@@ -307,7 +297,9 @@ describe('Filesystem', () => {
 
     describe('writeTextFile & readTextFile', () => {
       test('attempting to write an empty file throws an error', () => {
-        expect(() => writeTextFile(p('file.txt'), '')).toThrowError(ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID);
+        expect(() => writeTextFile(p('file.txt'), '')).toThrowError(
+          ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID,
+        );
       });
 
       test('can write and read a text file', () => {
@@ -322,13 +314,17 @@ describe('Filesystem', () => {
       test('attempting to read an empty text file throws an error', () => {
         createDirectory(p());
         writeFileSync(p('file.txt'), '', { encoding: 'utf-8' });
-        expect(() => readTextFile(p('file.txt'))).toThrowError(ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID);
+        expect(() => readTextFile(p('file.txt'))).toThrowError(
+          ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID,
+        );
       });
     });
 
     describe('writeJSONFile & readJSONFile', () => {
       test('attempting to write an empty or invalid file throws an error', () => {
-        expect(() => writeJSONFile(p('file.json'), '')).toThrowError(ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID);
+        expect(() => writeJSONFile(p('file.json'), '')).toThrowError(
+          ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID,
+        );
       });
 
       test('can write and read a JSON file by providing a string', () => {
@@ -348,14 +344,18 @@ describe('Filesystem', () => {
       test('attempting to read an empty/invalid json file throws an error', () => {
         createDirectory(p());
         writeFileSync(p('file.json'), '', { encoding: 'utf-8' });
-        expect(() => readJSONFile(p('file.json'))).toThrowError(ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID);
+        expect(() => readJSONFile(p('file.json'))).toThrowError(
+          ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID,
+        );
       });
     });
 
     describe('writeBufferFile & readBufferFile', () => {
       test('attempting to write an empty or invalid file throws an error', () => {
         // @ts-ignore
-        expect(() => writeBufferFile(p('file'), undefined)).toThrowError(ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID);
+        expect(() => writeBufferFile(p('file'), undefined)).toThrowError(
+          ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID,
+        );
       });
 
       test('can write and read a Buffer file', () => {
@@ -371,7 +371,9 @@ describe('Filesystem', () => {
       test('attempting to read an empty/invalid Buffer file throws an error', () => {
         createDirectory(p());
         writeFileSync(p('file'), '', { encoding: 'utf-8' });
-        expect(() => readBufferFile(p('file'))).toThrowError(ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID);
+        expect(() => readBufferFile(p('file'))).toThrowError(
+          ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID,
+        );
       });
     });
 
@@ -410,7 +412,7 @@ describe('Filesystem', () => {
         expect(isFile(p('some-file.txt'))).toBeFalsy();
       });
 
-      test('throws if the file does not exist or if it isn\'t a file', () => {
+      test("throws if the file does not exist or if it isn't a file", () => {
         expect(() => deleteFile(p('some-file.txt'))).toThrowError(ERRORS.NOT_A_FILE);
       });
 
@@ -439,12 +441,16 @@ describe('Filesystem', () => {
       });
 
       test('throws if the target file does not exist', () => {
-        expect(() => createFileSymLink(p('test-file.txt'), p('test-file-symlink.txt'))).toThrowError(ERRORS.NON_EXISTENT_FILE);
+        expect(() =>
+          createFileSymLink(p('test-file.txt'), p('test-file-symlink.txt')),
+        ).toThrowError(ERRORS.NON_EXISTENT_FILE);
       });
 
       test('throws if the target file is not a file', () => {
         createDirectory(p('some-file'));
-        expect(() => createFileSymLink(p('some-file'), p('some-file.txt'))).toThrowError(ERRORS.NOT_A_FILE);
+        expect(() => createFileSymLink(p('some-file'), p('some-file.txt'))).toThrowError(
+          ERRORS.NOT_A_FILE,
+        );
       });
     });
   });

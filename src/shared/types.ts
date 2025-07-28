@@ -35,23 +35,18 @@ type IPathElement = {
   creation: number;
 };
 
-
-
-
-
 /**
  * Read Directory Options
  * The options that can be provided to the readdirSync function to determine the output's format.
  */
-type IReadDirectoryOptions = {
-  encoding: BufferEncoding | null;
-  withFileTypes?: false | undefined;
-  recursive?: boolean | undefined;
-} | BufferEncoding | null;
-
-
-
-
+type IReadDirectoryOptions =
+  | {
+      encoding: BufferEncoding | null;
+      withFileTypes?: false | undefined;
+      recursive?: boolean | undefined;
+    }
+  | BufferEncoding
+  | null;
 
 /**
  * Directory Elements Options
@@ -82,20 +77,18 @@ type IDirectoryPathElements = {
   symbolicLinks: IPathElement[];
 };
 
-
-
-
-
 /**
  * Read File Options
  * The options that can be provided to the readFileSync function to determine the output's format.
  */
 
 // string options
-type IReadStringFileOptions = {
-  encoding: BufferEncoding;
-  flag?: string | undefined;
-} | BufferEncoding;
+type IReadStringFileOptions =
+  | {
+      encoding: BufferEncoding;
+      flag?: string | undefined;
+    }
+  | BufferEncoding;
 
 // Buffer options
 type IReadBufferFileOptions = {
@@ -105,10 +98,6 @@ type IReadBufferFileOptions = {
 
 // options
 type IReadFileOptions = IReadBufferFileOptions | IReadStringFileOptions;
-
-
-
-
 
 /* ************************************************************************************************
  *                                         MODULE EXPORTS                                         *
