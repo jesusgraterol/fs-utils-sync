@@ -1,6 +1,6 @@
 {
   "name": "fs-utils-sync",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "The fs-utils-sync package provides a collection of well-tested, synchronous file system utility functions. It promotes consistency and readability across projects by providing a unified approach to common file operations, saving you development time and improving code quality.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -40,6 +40,8 @@
     "@typescript-eslint/eslint-plugin": "7.18.0",
     "@typescript-eslint/parser": "7.18.0",
     "eslint-config-airbnb-typescript": "18.0.0",
+    "eslint-config-prettier": "10.1.8",
+    "prettier": "3.6.2",
     "ts-lib-builder": "1.0.7",
     "typescript": "5.7.2",
     "vitest": "3.2.4"
