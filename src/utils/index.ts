@@ -11,10 +11,6 @@ const DIRECTORY_ELEMENTS_DEFAULT_OPTIONS: IDirectoryElementsOptions = {
   includeExts: [],
 };
 
-
-
-
-
 /* ************************************************************************************************
  *                                       DIRECTORY ELEMENTS                                       *
  ************************************************************************************************ */
@@ -32,10 +28,6 @@ const buildDirectoryElementsOptions = (
   sortOrder: options?.sortOrder ?? DIRECTORY_ELEMENTS_DEFAULT_OPTIONS.sortOrder,
   includeExts: options?.includeExts ?? DIRECTORY_ELEMENTS_DEFAULT_OPTIONS.includeExts,
 });
-
-
-
-
 
 /* ************************************************************************************************
  *                                         MODULE EXPORTS                                         *

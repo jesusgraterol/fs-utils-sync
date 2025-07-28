@@ -10,7 +10,7 @@ The `fs-utils-sync` package provides a collection of well-tested, synchronous fi
 
 Install the package:
 ```bash
-npm install -S fs-utils-sync
+npm i -S fs-utils-sync
 ```
 
 ### Examples
@@ -60,6 +60,7 @@ getPathElement('project/some-file.json'); // null
 
 <details>
   <summary><code>pathExists</code></summary>
+  <br/>
   
   Checks if a path exists (file or directory).
   ```typescript
@@ -68,10 +69,12 @@ getPathElement('project/some-file.json'); // null
   pathExists('some-existent-dir'); // true
   pathExists('some-non-existent-file.json'); // false
   ```
+  <br/>
 </details>
 
 <details>
   <summary><code>getPathElement</code></summary>
+  <br/>
   
   Reads the content of a given path and returns the stats. If the path doesn't exist, it returns `null`
   ```typescript
@@ -89,12 +92,14 @@ getPathElement('project/some-file.json'); // null
   //    creation: 1715264137289,
   // }
   ```
+  <br/>
 </details>
 
 ### Directory Actions
 
 <details>
   <summary><code>isDirectory</code></summary>
+  <br/>
   
   Verifies if a given path exists and is a directory.
   ```typescript
@@ -104,10 +109,12 @@ getPathElement('project/some-file.json'); // null
   isDirectory('some-non-existent-dir'); // false
   isDirectory('some-existent-file.json'); // false
   ```
+  <br/>
 </details>
 
 <details>
   <summary><code>deleteDirectory</code></summary>
+  <br/>
   
   Deletes the directory located in the given path.
   ```typescript
@@ -117,10 +124,12 @@ getPathElement('project/some-file.json'); // null
   deleteDirectory('some-non-existent-dir');
   isDirectory('some-existent-dir'); // false
   ```
+  <br/>
 </details>
 
 <details>
   <summary><code>createDirectory</code></summary>
+  <br/>
   
   Creates a directory at a given path.
   ```typescript
@@ -130,10 +139,12 @@ getPathElement('project/some-file.json'); // null
   createDirectory('some-dir');
   isDirectory('some-dir'); // true
   ```
+  <br/>
 </details>
 
 <details>
   <summary><code>copyDirectory</code></summary>
+  <br/>
   
   It copies a directory (and sub directories) from `srcPath` to `destPath`. Keep in mind the `destPath` is completely overridden.
   ```typescript
@@ -144,10 +155,12 @@ getPathElement('project/some-file.json'); // null
   copyDirectory('some-dir', 'my-copy');
   isDirectory('my-copy'); // true
   ```
+  <br/>
 </details>
 
 <details>
   <summary><code>createDirectorySymLink</code></summary>
+  <br/>
   
   Creates a symlink for the `target` directory at `path`.
   ```typescript
@@ -155,10 +168,12 @@ getPathElement('project/some-file.json'); // null
 
   createDirectorySymLink('some-dir', 'some-dir-symlink');
   ```
+  <br/>
 </details>
 
 <details>
   <summary><code>readDirectory</code></summary>
+  <br/>
   
   Reads the contents of a directory based on the provided options and returns them.
   ```typescript
@@ -172,10 +187,12 @@ getPathElement('project/some-file.json'); // null
   //   'some-dir/inner/inner-01.txt'
   // ]
   ```
+  <br/>
 </details>
 
 <details>
   <summary><code>getDirectoryElements</code></summary>
+  <br/>
   
   Retrieves all the path elements in the given directory based on the provided options. 
   IMPORTANT: if the `includeExts` option is provided, make sure to lowercase all extensions (e.g `'.json'`).
@@ -252,6 +269,7 @@ getPathElement('project/some-file.json'); // null
   //   ]
   // }
   ```
+  <br/>
 </details>
 
 
@@ -259,6 +277,7 @@ getPathElement('project/some-file.json'); // null
 
 <details>
   <summary><code>isFile</code></summary>
+  <br/>
   
   Verifies if a given path exists and is a file.
   ```typescript
@@ -267,10 +286,12 @@ getPathElement('project/some-file.json'); // null
   isFile('existent-file.json'); // true
   isFile('non-existent-file.json'); // false
   ```
+  <br/>
 </details>
 
 <details>
   <summary><code>writeFile</code></summary>
+  <br/>
   
   Creates the base directory for a file in case it doesn't exist and then it writes the file.
   ```typescript
@@ -278,10 +299,12 @@ getPathElement('project/some-file.json'); // null
 
   writeFile('test-file.txt', 'Hello World!', { encoding: 'utf-8' });
   ```
+  <br/>
 </details>
 
 <details>
   <summary><code>writeTextFile</code></summary>
+  <br/>
   
   Writes a text file on a given path.
   ```typescript
@@ -289,10 +312,12 @@ getPathElement('project/some-file.json'); // null
 
   writeTextFile('test-file.txt', 'Hello World!');
   ```
+  <br/>
 </details>
 
 <details>
   <summary><code>writeJSONFile</code></summary>
+  <br/>
   
   Writes a JSON file on a given path. If an object is provided, it will be stringified.
   ```typescript
@@ -300,10 +325,12 @@ getPathElement('project/some-file.json'); // null
 
   writeJSONFile('test-file.json', { id: 1, nickname: 'test-user' });
   ```
+  <br/>
 </details>
 
 <details>
   <summary><code>writeBufferFile</code></summary>
+  <br/>
   
   Writes a Buffer file on a given path. If an object is provided, it will be stringified.
   ```typescript
@@ -312,10 +339,12 @@ getPathElement('project/some-file.json'); // null
 
   writeBufferFile('test-file', Buffer.from('Hello World!'));
   ```
+  <br/>
 </details>
 
 <details>
   <summary><code>readFile</code></summary>
+  <br/>
   
   Reads and returns the contents of a file.
   ```typescript
@@ -323,10 +352,12 @@ getPathElement('project/some-file.json'); // null
 
   readFile('test-file.txt', { encoding: 'utf-8' }); // 'Hello World!'
   ```
+  <br/>
 </details>
 
 <details>
   <summary><code>readTextFile</code></summary>
+  <br/>
   
   Reads a text file and returns its contents.
   ```typescript
@@ -334,10 +365,12 @@ getPathElement('project/some-file.json'); // null
 
   readTextFile('test-file.txt'); // 'Hello World!'
   ```
+  <br/>
 </details>
 
 <details>
   <summary><code>readJSONFile</code></summary>
+  <br/>
   
   Reads a text file, parses and returns its contents.
   ```typescript
@@ -345,10 +378,12 @@ getPathElement('project/some-file.json'); // null
 
   readJSONFile('test-file.json'); // { id: 1, nickname: 'test-user' }
   ```
+  <br/>
 </details>
 
 <details>
   <summary><code>readBufferFile</code></summary>
+  <br/>
   
   Reads a Buffer file and returns its contents.
   ```typescript
@@ -356,10 +391,12 @@ getPathElement('project/some-file.json'); // null
 
   readBufferFile('test-file'); // <Buffer 48 65 6c 6c 6f 20 57 6f 72 6c 64 21>
   ```
+  <br/>
 </details>
 
 <details>
   <summary><code>copyFile</code></summary>
+  <br/>
   
   Copies a file from `srcPath` to `destPath`, replacing the destination if it exists.
   ```typescript
@@ -370,10 +407,12 @@ getPathElement('project/some-file.json'); // null
   copyFile('file-a.json', 'file-b.json');
   isFile('file-b.json'); // true
   ```
+  <br/>
 </details>
 
 <details>
   <summary><code>deleteFile</code></summary>
+  <br/>
   
   Deletes the file located at the provided `path`.
   ```typescript
@@ -383,10 +422,12 @@ getPathElement('project/some-file.json'); // null
   deleteFile('file-a.json');
   isFile('file-a.json'); // false
   ```
+  <br/>
 </details>
 
 <details>
   <summary><code>createFileSymLink</code></summary>
+  <br/>
   
   Creates a symlink for a given file.
   ```typescript
@@ -394,6 +435,7 @@ getPathElement('project/some-file.json'); // null
 
   createFileSymLink('test-file.txt', 'test-file-symlink.txt');
   ```
+  <br/>
 </details>
 
 
@@ -406,6 +448,7 @@ getPathElement('project/some-file.json'); // null
 
 <details>
   <summary><code>IPathElement</code></summary>
+  <br/>
   
   The most relevant information regarding a path element, extracted by making use of the `lstat` function.
   ```typescript
@@ -435,10 +478,12 @@ getPathElement('project/some-file.json'); // null
     creation: number;
   }
   ```
+  <br/>
 </details>
 
 <details>
   <summary><code>IDirectoryElementsOptions</code></summary>
+  <br/>
   
   When querying the path elements from within a directory, a series of filters and sorting options can be provided.
   ```typescript
@@ -457,10 +502,12 @@ getPathElement('project/some-file.json'); // null
     includeExts: string[];
   };
   ```
+  <br/>
 </details>
 
 <details>
   <summary><code>IDirectoryPathElements</code></summary>
+  <br/>
   
   The output emitted when retrieving all the path elements within a directory.
   ```typescript
@@ -470,6 +517,7 @@ getPathElement('project/some-file.json'); // null
     symbolicLinks: IPathElement[];
   };
   ```
+  <br/>
 </details>
 
 
@@ -506,28 +554,3 @@ npm run test:integration
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)
-
-
-
-
-
-<br/>
-
-## Deployment
-
-Install dependencies:
-```bash
-npm install
-```
-
-
-Build the library:
-```bash
-npm start
-```
-
-
-Publish to `npm`:
-```bash
-npm publish
-```

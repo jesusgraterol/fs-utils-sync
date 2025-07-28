@@ -71,10 +71,6 @@ const getPathElement = (path: string): IPathElement | null => {
   }
 };
 
-
-
-
-
 /* ************************************************************************************************
  *                                       DIRECTORY ACTIONS                                        *
  ************************************************************************************************ */
@@ -108,7 +104,9 @@ const createDirectory = (path: string, deleteIfExists?: boolean): void => {
     if (deleteIfExists) {
       deleteDirectory(path);
     } else {
-      throw new Error(encodeError(`The directory ${path} already exists.`, ERRORS.DIRECTORY_ALREADY_EXISTS));
+      throw new Error(
+        encodeError(`The directory ${path} already exists.`, ERRORS.DIRECTORY_ALREADY_EXISTS),
+      );
     }
   }
   mkdirSync(path, { recursive: true });
@@ -124,7 +122,9 @@ const createDirectory = (path: string, deleteIfExists?: boolean): void => {
  */
 const copyDirectory = (srcPath: string, destPath: string): void => {
   if (!isDirectory(srcPath)) {
-    throw new Error(encodeError(`The srcPath '${srcPath}' is not a directory.`, ERRORS.NOT_A_DIRECTORY));
+    throw new Error(
+      encodeError(`The srcPath '${srcPath}' is not a directory.`, ERRORS.NOT_A_DIRECTORY),
+    );
   }
   deleteDirectory(destPath);
   cpSync(srcPath, destPath, { recursive: true });
@@ -141,10 +141,14 @@ const copyDirectory = (srcPath: string, destPath: string): void => {
 const createDirectorySymLink = (target: string, path: string): void => {
   const el = getPathElement(target);
   if (el === null) {
-    throw new Error(encodeError(`The target dir '${target}' does not exist.`, ERRORS.NON_EXISTENT_DIRECTORY));
+    throw new Error(
+      encodeError(`The target dir '${target}' does not exist.`, ERRORS.NON_EXISTENT_DIRECTORY),
+    );
   }
   if (!el.isDirectory) {
-    throw new Error(encodeError(`The target dir '${target}' is not a directory.`, ERRORS.NOT_A_DIRECTORY));
+    throw new Error(
+      encodeError(`The target dir '${target}' is not a directory.`, ERRORS.NOT_A_DIRECTORY),
+    );
   }
   symlinkSync(target, path, 'dir');
 };
@@ -161,10 +165,9 @@ const readDirectory = (path: string, recursive: boolean = false): string[] => {
   if (!isDirectory(path)) {
     throw new Error(encodeError(`The dir '${path}' is not a directory.`, ERRORS.NOT_A_DIRECTORY));
   }
-  return readdirSync(
-    path,
-    <IReadDirectoryOptions>{ encoding: 'utf-8', recursive },
-  ).map((contentPath) => `${path}/${contentPath}`);
+  return readdirSync(path, <IReadDirectoryOptions>{ encoding: 'utf-8', recursive }).map(
+    (contentPath) => `${path}/${contentPath}`,
+  );
 };
 
 /**
@@ -199,10 +202,10 @@ const getDirectoryElements = (
   els.forEach((el: IPathElement) => {
     if (el.isDirectory) {
       directories.push(el);
-    } else if (el.isFile && (
-      !opts.includeExts.length
-      || opts.includeExts.includes(el.extName.toLowerCase())
-    )) {
+    } else if (
+      el.isFile &&
+      (!opts.includeExts.length || opts.includeExts.includes(el.extName.toLowerCase()))
+    ) {
       files.push(el);
     } else if (el.isSymbolicLink) {
       symbolicLinks.push(el);
@@ -217,10 +220,6 @@ const getDirectoryElements = (
   // finally, return the elements build
   return { directories, files, symbolicLinks };
 };
-
-
-
-
 
 /* ************************************************************************************************
  *                                          FILE ACTIONS                                          *
@@ -263,7 +262,12 @@ const writeFile = (
  */
 const writeTextFile = (path: string, data: string): void => {
   if (typeof data !== 'string' || !data.length) {
-    throw new Error(encodeError(`The provided data for the file '${path}' is empty or invalid. Received: ${data}`, ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID));
+    throw new Error(
+      encodeError(
+        `The provided data for the file '${path}' is empty or invalid. Received: ${data}`,
+        ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID,
+      ),
+    );
   }
   writeFile(path, data, { encoding: 'utf-8' });
 };
@@ -285,7 +289,12 @@ const writeJSONFile = (
   try {
     fileData = typeof data === 'string' ? data : JSON.stringify(data, undefined, space);
   } catch (e) {
-    throw new Error(encodeError(`The JSON data for the file '${path}' could not be stringified: ${extractMessage(e)}`, ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID));
+    throw new Error(
+      encodeError(
+        `The JSON data for the file '${path}' could not be stringified: ${extractMessage(e)}`,
+        ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID,
+      ),
+    );
   }
   writeTextFile(path, fileData);
 };
@@ -299,7 +308,12 @@ const writeJSONFile = (
  */
 const writeBufferFile = (path: string, data: Buffer): void => {
   if (!Buffer.isBuffer(data)) {
-    throw new Error(encodeError(`The provided data is not a valid Buffer. Received: ${data}`, ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID));
+    throw new Error(
+      encodeError(
+        `The provided data is not a valid Buffer. Received: ${data}`,
+        ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID,
+      ),
+    );
   }
   writeFile(path, data);
 };
@@ -330,7 +344,12 @@ const readFile = (path: string, options: IReadFileOptions = null): string | Buff
 const readTextFile = (path: string): string => {
   const content = readFile(path, { encoding: 'utf-8' });
   if (typeof content !== 'string' || !content.length) {
-    throw new Error(encodeError(`The file '${path}' is empty or invalid.`, ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID));
+    throw new Error(
+      encodeError(
+        `The file '${path}' is empty or invalid.`,
+        ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID,
+      ),
+    );
   }
   return content;
 };
@@ -349,7 +368,12 @@ const readJSONFile = (path: string): Record<string, any> => {
   try {
     return JSON.parse(content);
   } catch (e) {
-    throw new Error(encodeError(`The JSON file '${path}' cound not be parsed: ${extractMessage(e)}`, ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID));
+    throw new Error(
+      encodeError(
+        `The JSON file '${path}' cound not be parsed: ${extractMessage(e)}`,
+        ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID,
+      ),
+    );
   }
 };
 
@@ -364,7 +388,12 @@ const readJSONFile = (path: string): Record<string, any> => {
 const readBufferFile = (path: string): Buffer => {
   const content = readFile(path, null);
   if (!Buffer.isBuffer(content) || !content.toString().length) {
-    throw new Error(encodeError(`The file '${path}' is not a valid Buffer. Received: ${content}`, ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID));
+    throw new Error(
+      encodeError(
+        `The file '${path}' is not a valid Buffer. Received: ${content}`,
+        ERRORS.FILE_CONTENT_IS_EMPTY_OR_INVALID,
+      ),
+    );
   }
   return content;
 };
@@ -407,17 +436,15 @@ const deleteFile = (path: string): void => {
 const createFileSymLink = (target: string, path: string) => {
   const el = getPathElement(target);
   if (el === null) {
-    throw new Error(encodeError(`The target file '${target}' does not exist.`, ERRORS.NON_EXISTENT_FILE));
+    throw new Error(
+      encodeError(`The target file '${target}' does not exist.`, ERRORS.NON_EXISTENT_FILE),
+    );
   }
   if (!el.isFile) {
     throw new Error(encodeError(`The target file '${target}' is not a file.`, ERRORS.NOT_A_FILE));
   }
   symlinkSync(target, path, 'file');
 };
-
-
-
-
 
 /* ************************************************************************************************
  *                                         MODULE EXPORTS                                         *
