@@ -280,9 +280,9 @@ const writeTextFile = (path: string, data: string): void => {
  * @throws
  * - FILE_CONTENT_IS_EMPTY_OR_INVALID: if the JSON content cannot be stringified
  */
-const writeJSONFile = (
+const writeJSONFile = <T = Record<string, any>>(
   path: string,
-  data: Record<string, any> | string,
+  data: T | string,
   space: number = 2,
 ): void => {
   let fileData: string;
@@ -363,7 +363,7 @@ const readTextFile = (path: string): string => {
  * - FILE_CONTENT_IS_EMPTY_OR_INVALID: if the content of the file is empty or invalid
  * - FILE_CONTENT_IS_EMPTY_OR_INVALID: if the file's JSON content cannot be parsed
  */
-const readJSONFile = (path: string): Record<string, any> => {
+const readJSONFile = <T = Record<string, any>>(path: string): T => {
   const content = readTextFile(path);
   try {
     return JSON.parse(content);
