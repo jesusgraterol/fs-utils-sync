@@ -376,7 +376,7 @@ getPathElement('project/some-file.json'); // null
   ```typescript
   import { readJSONFile } from 'fs-utils-sync';
 
-  readJSONFile('test-file.json'); // { id: 1, nickname: 'test-user' }
+  readJSONFile<IUser>('test-file.json'); // { id: 1, nickname: 'test-user' }
   ```
   <br/>
 </details>
@@ -538,6 +538,9 @@ getPathElement('project/some-file.json'); // null
 ## Running the Tests
 
 ```bash
+# unit and integration tests
+npm run test
+
 # unit tests
 npm run test:unit
 
