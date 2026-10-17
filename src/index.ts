@@ -1,4 +1,5 @@
 import { Buffer } from 'node:buffer';
+import { randomUUID } from 'node:crypto';
 import {
   accessSync,
   lstatSync,
@@ -13,8 +14,17 @@ import {
   cpSync,
   readdirSync,
   WriteFileOptions,
+  openSync,
+  closeSync,
+  fchmodSync,
+  fsyncSync,
+  renameSync,
+  statSync,
+  fstatSync,
+  readSync,
+  constants,
 } from 'node:fs';
-import { basename, extname, dirname } from 'node:path';
+import { basename, extname, dirname, join, relative, resolve, isAbsolute, sep } from 'node:path';
 import { encodeError, extractMessage } from 'error-message-utils';
 import { sortRecords } from 'web-utils-kit';
 import {
@@ -69,6 +79,23 @@ const getPathElement = (path: string): IPathElement | null => {
     // throw new Error(`ENOENT: no such file or directory, lstat '${path}'`); // original error
     return null;
   }
+};
+
+/**
+ * Checks if the target path is the root path itself or is nested inside it. The check is lexical:
+ * both paths are resolved without touching the filesystem, and symbolic links aren't followed.
+ * Sibling paths that share a prefix, such as '/data/app' and '/data/application', aren't nested,
+ * and neither is a path on another drive on Windows.
+ * @param rootPath
+ * @param targetPath
+ * @returns boolean
+ */
+const isPathWithin = (rootPath: string, targetPath: string): boolean => {
+  const relativePath = relative(resolve(rootPath), resolve(targetPath));
+  return (
+    relativePath === '' ||
+    (relativePath !== '..' && !relativePath.startsWith(`..${sep}`) && !isAbsolute(relativePath))
+  );
 };
 
 /* ************************************************************************************************
@@ -446,6 +473,171 @@ const createFileSymLink = (target: string, path: string) => {
   symlinkSync(target, path, 'file');
 };
 
+/**
+ * Reads the permission bits of an existing file, or returns undefined when it doesn't exist.
+ * @param path
+ * @returns number | undefined
+ */
+const readPermissionBits = (path: string): number | undefined => {
+  try {
+    return statSync(path).mode & 0o777;
+  } catch (e) {
+    if ((e as NodeJS.ErrnoException).code === 'ENOENT') {
+      return undefined;
+    }
+    throw e;
+  }
+};
+
+/**
+ * Flushes a directory's entries to disk, so a rename inside it survives a crash.
+ * @param path
+ */
+const syncDirectory = (path: string): void => {
+  const fd = openSync(path, 'r');
+  try {
+    fsyncSync(fd);
+  } finally {
+    closeSync(fd);
+  }
+};
+
+/**
+ * Writes a file atomically: readers see either the previous content or the complete new content,
+ * never a partial write. The data goes to a temporary file in the same directory, which is
+ * flushed to disk and then renamed over the path. On POSIX, the directory is flushed as well.
+ *
+ * An explicit mode wins. Without one, a replaced file keeps its permission bits, and a new file
+ * gets the platform default, as with writeFile. The temporary file is never readable more widely
+ * than the final mode. The owner of a replaced file isn't preserved.
+ *
+ * When writing fails before the rename, the temporary file is removed, the destination is left
+ * untouched and the original error is rethrown. If flushing the directory fails after the rename,
+ * the error is thrown even though the destination already holds the new content.
+ * @param path
+ * @param data
+ * @param mode? the permission bits of the written file, for example 0o600
+ */
+const writeFileAtomic = (
+  path: string,
+  data: string | NodeJS.ArrayBufferView,
+  mode?: number,
+): void => {
+  const dirName = dirname(path);
+  if (!pathExists(dirName)) {
+    createDirectory(dirName);
+  }
+  const finalMode = mode ?? readPermissionBits(path);
+  const tempPath = join(dirName, `.${randomUUID()}.tmp`);
+  let isRenamed = false;
+  try {
+    // a known final mode is applied with fchmod, so the umask can't change it
+    const fd = openSync(tempPath, 'wx', finalMode === undefined ? 0o666 : 0o600);
+    try {
+      if (finalMode !== undefined) {
+        fchmodSync(fd, finalMode);
+      }
+      writeFileSync(fd, data);
+      fsyncSync(fd);
+    } finally {
+      closeSync(fd);
+    }
+    renameSync(tempPath, path);
+    isRenamed = true;
+  } finally {
+    if (!isRenamed) {
+      rmSync(tempPath, { force: true });
+    }
+  }
+  if (process.platform !== 'win32') {
+    syncDirectory(dirName);
+  }
+};
+
+// the number of bytes read per call by readBoundedFile
+const BOUNDED_READ_CHUNK_SIZE = 65536;
+
+/**
+ * Opens a file for a bounded read without following a symbolic link in its final component.
+ * @param path
+ * @returns number
+ * @throws
+ * - NOT_A_FILE: if the path doesn't exist or its final component is a symbolic link
+ */
+const openWithoutFollowing = (path: string): number => {
+  try {
+    if (process.platform === 'win32') {
+      // Windows has no O_NOFOLLOW, so a link swapped in after this check isn't detected
+      if (lstatSync(path).isSymbolicLink()) {
+        throw new Error(encodeError(`The file '${path}' is a symbolic link.`, ERRORS.NOT_A_FILE));
+      }
+      return openSync(path, constants.O_RDONLY);
+    }
+    // O_NONBLOCK keeps a named pipe at the path from blocking the open
+    return openSync(path, constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK);
+  } catch (e) {
+    const code = (e as NodeJS.ErrnoException).code;
+    if (code === 'ENOENT' || code === 'ELOOP' || code === 'EMLINK') {
+      throw new Error(
+        encodeError(
+          `The file '${path}' doesn't exist or is a symbolic link: ${extractMessage(e)}`,
+          ERRORS.NOT_A_FILE,
+        ),
+      );
+    }
+    throw e;
+  }
+};
+
+/**
+ * Reads a regular file of at most maxBytes bytes and returns its content. It never follows a
+ * symbolic link in the path's final component, but links in parent directories are followed, so
+ * callers that need containment should combine it with isPathWithin and their own checks of the
+ * parent directories. It reads at most maxBytes + 1 bytes, even when the file grows while it is
+ * being read.
+ * @param path
+ * @param maxBytes
+ * @returns Buffer
+ * @throws
+ * - NOT_A_FILE: if the path doesn't exist, its final component is a symbolic link, or it isn't a regular file
+ * - FILE_TOO_LARGE: if the file holds more than maxBytes bytes
+ */
+const readBoundedFile = (path: string, maxBytes: number): Buffer => {
+  const fd = openWithoutFollowing(path);
+  try {
+    const stats = fstatSync(fd);
+    if (!stats.isFile()) {
+      throw new Error(encodeError(`The file '${path}' is not a file.`, ERRORS.NOT_A_FILE));
+    }
+    const tooLarge = () =>
+      new Error(
+        encodeError(`The file '${path}' is larger than ${maxBytes} bytes.`, ERRORS.FILE_TOO_LARGE),
+      );
+    if (stats.size > maxBytes) {
+      throw tooLarge();
+    }
+    const chunks: Buffer[] = [];
+    let totalBytes = 0;
+    while (totalBytes <= maxBytes) {
+      const chunk = Buffer.allocUnsafe(
+        Math.min(BOUNDED_READ_CHUNK_SIZE, maxBytes + 1 - totalBytes),
+      );
+      const bytesRead = readSync(fd, chunk, 0, chunk.length, totalBytes);
+      if (bytesRead === 0) {
+        break;
+      }
+      chunks.push(chunk.subarray(0, bytesRead));
+      totalBytes += bytesRead;
+    }
+    if (totalBytes > maxBytes) {
+      throw tooLarge();
+    }
+    return Buffer.concat(chunks, totalBytes);
+  } finally {
+    closeSync(fd);
+  }
+};
+
 /* ************************************************************************************************
  *                                         MODULE EXPORTS                                         *
  ************************************************************************************************ */
@@ -459,6 +651,7 @@ export {
   // general actions
   pathExists,
   getPathElement,
+  isPathWithin,
 
   // directory actions
   isDirectory,
@@ -482,4 +675,6 @@ export {
   copyFile,
   deleteFile,
   createFileSymLink,
+  writeFileAtomic,
+  readBoundedFile,
 };
