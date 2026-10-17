@@ -2,6 +2,8 @@
 
 The `fs-utils-sync` package provides a collection of well-tested, synchronous file system utility functions. It promotes consistency and readability across projects by providing a unified approach to common file operations, saving you development time and improving code quality.
 
+For asynchronous code, [`fs-utils-async`](https://www.npmjs.com/package/fs-utils-async) exports the same functions under the same names, returning promises.
+
 
 
 </br>
@@ -91,6 +93,22 @@ getPathElement('project/some-file.json'); // null
   //    size: 8647,
   //    creation: 1715264137289,
   // }
+  ```
+  <br/>
+</details>
+
+<details>
+  <summary><code>isPathWithin</code></summary>
+  <br/>
+  
+  Checks if a target path is the root path itself or is nested inside it. The check is lexical: both paths are resolved without touching the filesystem, and symbolic links aren't followed. Sibling paths that share a prefix aren't nested, and neither is a path on another drive on Windows.
+  ```typescript
+  import { isPathWithin } from 'fs-utils-sync';
+
+  isPathWithin('/data/app', '/data/app'); // true
+  isPathWithin('/data/app', '/data/app/logs/today.log'); // true
+  isPathWithin('/data/app', '/data/app/../secrets'); // false
+  isPathWithin('/data/app', '/data/application'); // false
   ```
   <br/>
 </details>
@@ -434,6 +452,42 @@ getPathElement('project/some-file.json'); // null
   import { createFileSymLink } from 'fs-utils-sync';
 
   createFileSymLink('test-file.txt', 'test-file-symlink.txt');
+  ```
+  <br/>
+</details>
+
+<details>
+  <summary><code>writeFileAtomic</code></summary>
+  <br/>
+  
+  Writes a file atomically, so readers see either the previous content or the complete new content, never a partial write. The data goes to a temporary file in the same directory, which is flushed to disk and renamed over the path. On POSIX, the directory is flushed as well. Missing parent directories are created.
+
+  Permissions: an explicit `mode` wins. Without one, a replaced file keeps its permission bits, and a new file gets the platform default, as with `writeFile`. The temporary file is never readable more widely than the final mode. The owner of a replaced file isn't preserved.
+
+  Failures: when writing fails before the rename, the temporary file is removed, the destination is left untouched and the original error is rethrown. If flushing the directory fails after the rename, the error is thrown even though the destination already holds the new content.
+  ```typescript
+  import { writeFileAtomic } from 'fs-utils-sync';
+
+  writeFileAtomic('project/state.json', JSON.stringify({ step: 2 }));
+  writeFileAtomic('project/.env.local', 'API_KEY=example', 0o600);
+  ```
+  <br/>
+</details>
+
+<details>
+  <summary><code>readBoundedFile</code></summary>
+  <br/>
+  
+  Reads a regular file of at most `maxBytes` bytes and returns its content as a `Buffer`. It reads at most `maxBytes + 1` bytes, even when the file grows while it is being read, and a named pipe at the path can't make it block.
+
+  It never follows a symbolic link in the path's final component. Symbolic links in parent directories are followed, so code that must stay inside a directory should combine it with `isPathWithin` and its own checks of the parent directories. On Windows, which has no `O_NOFOLLOW`, the link check runs just before opening, so a link swapped in between isn't detected.
+
+  It throws `NOT_A_FILE` when the path doesn't exist, its final component is a symbolic link, or it isn't a regular file, and `FILE_TOO_LARGE` when the file holds more than `maxBytes` bytes.
+  ```typescript
+  import { readBoundedFile } from 'fs-utils-sync';
+
+  readBoundedFile('project/state.json', 1024 * 1024).toString('utf-8');
+  // '{"step":2}'
   ```
   <br/>
 </details>

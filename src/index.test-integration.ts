@@ -1,6 +1,15 @@
 import { describe, afterAll, beforeEach, test, expect } from 'vitest';
 import { Buffer } from 'node:buffer';
-import { writeFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import {
+  chmodSync,
+  readdirSync,
+  readFileSync,
+  statSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs';
+import { resolve } from 'node:path';
 import { ERRORS } from './shared/errors.js';
 import {
   deleteDirectory,
@@ -22,6 +31,10 @@ import {
   readBufferFile,
   writeBufferFile,
   getDirectoryElements,
+  isPathWithin,
+  writeFileAtomic,
+  readBoundedFile,
+  writeFile,
 } from './index.js';
 
 /* ************************************************************************************************
@@ -38,6 +51,16 @@ const BASE_PATH = 'fs-test-dir';
 // builds a path inside of the base path
 const p = (path?: string): string =>
   typeof path === 'string' ? `${BASE_PATH}/${path}` : BASE_PATH;
+
+// whether the tests run on Windows, where POSIX permissions, FIFOs and O_NOFOLLOW don't apply
+const IS_WINDOWS = process.platform === 'win32';
+
+// reads the permission bits of a path
+const permissionBits = (path: string): number => statSync(path).mode & 0o777;
+
+// lists the temporary files writeFileAtomic left in a directory
+const listTemporaryFiles = (path: string): string[] =>
+  readdirSync(path).filter((name) => name.endsWith('.tmp'));
 
 /* ************************************************************************************************
  *                                             TESTS                                              *
@@ -102,6 +125,26 @@ describe('Filesystem', () => {
         expect(el!.isFile).toBeTruthy();
         expect(el!.isSymbolicLink).toBeFalsy();
         expect(typeof el!.size).toBe('number');
+      });
+    });
+
+    describe('isPathWithin', () => {
+      test.each([
+        ['/data/app', '/data/app', true],
+        ['/data/app', '/data/app/logs/today.log', true],
+        ['/data/app', '/data/app/..cache', true],
+        ['/data/app', '/data/app/../secrets', false],
+        ['/data/app', '/data/application', false],
+        ['/data/app', '/data', false],
+        ['data/app', 'data/app/file.txt', true],
+        ['data/app', './data/app/./file.txt', true],
+        ['data/app', 'data/other', false],
+      ])('isPathWithin(%s, %s) -> %s', (rootPath, targetPath, expected) => {
+        expect(isPathWithin(rootPath, targetPath)).toBe(expected);
+      });
+
+      test('compares relative and absolute paths through the working directory', () => {
+        expect(isPathWithin(p(), resolve(p('nested/file.txt')))).toBe(true);
       });
     });
   });
@@ -451,6 +494,105 @@ describe('Filesystem', () => {
         expect(() => createFileSymLink(p('some-file'), p('some-file.txt'))).toThrowError(
           ERRORS.NOT_A_FILE,
         );
+      });
+    });
+
+    describe('writeFileAtomic', () => {
+      test('creates missing parent directories and writes the content', () => {
+        writeFileAtomic(p('nested/dir/file.txt'), 'Hello World!');
+        expect(readFileSync(p('nested/dir/file.txt'), 'utf-8')).toBe('Hello World!');
+        expect(listTemporaryFiles(p('nested/dir'))).toStrictEqual([]);
+      });
+
+      test('replaces existing content and accepts bytes and empty content', () => {
+        writeTextFile(p('file.bin'), 'old content');
+        writeFileAtomic(p('file.bin'), Buffer.from([1, 2, 3]));
+        expect(readFileSync(p('file.bin'))).toStrictEqual(Buffer.from([1, 2, 3]));
+        writeFileAtomic(p('file.bin'), '');
+        expect(readFileSync(p('file.bin'), 'utf-8')).toBe('');
+        expect(listTemporaryFiles(p())).toStrictEqual([]);
+      });
+
+      test('writes a destination whose name is 255 bytes long', () => {
+        const name = `${'a'.repeat(251)}.txt`;
+        writeFileAtomic(p(name), 'Hello World!');
+        expect(readFileSync(p(name), 'utf-8')).toBe('Hello World!');
+      });
+
+      test.skipIf(IS_WINDOWS)('applies an explicit mode', () => {
+        writeFileAtomic(p('secret.txt'), 'Hello World!', 0o640);
+        expect(permissionBits(p('secret.txt'))).toBe(0o640);
+      });
+
+      test.skipIf(IS_WINDOWS)('keeps the permissions of a replaced file without a mode', () => {
+        writeTextFile(p('secret.txt'), 'old content');
+        chmodSync(p('secret.txt'), 0o600);
+        writeFileAtomic(p('secret.txt'), 'new content');
+        expect(permissionBits(p('secret.txt'))).toBe(0o600);
+        expect(readFileSync(p('secret.txt'), 'utf-8')).toBe('new content');
+      });
+
+      test.skipIf(IS_WINDOWS)('gives a new file the same permissions as writeFile', () => {
+        writeFile(p('plain.txt'), 'Hello World!');
+        writeFileAtomic(p('atomic.txt'), 'Hello World!');
+        expect(permissionBits(p('atomic.txt'))).toBe(permissionBits(p('plain.txt')));
+      });
+
+      test('removes the temporary file and rethrows when the rename fails', () => {
+        createDirectory(p('target'));
+        expect(() => writeFileAtomic(p('target'), 'Hello World!')).toThrowError();
+        expect(isDirectory(p('target'))).toBe(true);
+        expect(listTemporaryFiles(p())).toStrictEqual([]);
+      });
+    });
+
+    describe('readBoundedFile', () => {
+      test('reads content of exactly maxBytes bytes', () => {
+        writeTextFile(p('file.txt'), 'abcd');
+        expect(readBoundedFile(p('file.txt'), 4)).toStrictEqual(Buffer.from('abcd'));
+      });
+
+      test('reads an empty file', () => {
+        writeFile(p('empty.txt'), '');
+        expect(readBoundedFile(p('empty.txt'), 4)).toStrictEqual(Buffer.alloc(0));
+      });
+
+      test('reads content larger than one read chunk', () => {
+        const content = Buffer.alloc(200_000, 7);
+        writeFile(p('large.bin'), content);
+        expect(readBoundedFile(p('large.bin'), 200_000)).toStrictEqual(content);
+      });
+
+      test('throws when the content exceeds maxBytes', () => {
+        writeTextFile(p('file.txt'), 'abcde');
+        expect(() => readBoundedFile(p('file.txt'), 4)).toThrowError(ERRORS.FILE_TOO_LARGE);
+      });
+
+      test('throws when the path does not exist', () => {
+        expect(() => readBoundedFile(p('missing.txt'), 4)).toThrowError(ERRORS.NOT_A_FILE);
+      });
+
+      test('throws when the path is a directory', () => {
+        createDirectory(p('some-dir'));
+        expect(() => readBoundedFile(p('some-dir'), 4)).toThrowError(ERRORS.NOT_A_FILE);
+      });
+
+      test.skipIf(IS_WINDOWS)('throws when the final path component is a symbolic link', () => {
+        writeTextFile(p('file.txt'), 'abcd');
+        createFileSymLink(resolve(p('file.txt')), p('link.txt'));
+        expect(() => readBoundedFile(p('link.txt'), 4)).toThrowError(ERRORS.NOT_A_FILE);
+      });
+
+      test.skipIf(IS_WINDOWS)('throws for a named pipe without blocking', () => {
+        createDirectory(p());
+        execFileSync('mkfifo', [p('pipe')]);
+        expect(() => readBoundedFile(p('pipe'), 4)).toThrowError(ERRORS.NOT_A_FILE);
+      });
+
+      test.skipIf(IS_WINDOWS)('follows symbolic links in parent directories', () => {
+        writeTextFile(p('real/file.txt'), 'abcd');
+        symlinkSync(resolve(p('real')), p('linked'), 'dir');
+        expect(readBoundedFile(p('linked/file.txt'), 4)).toStrictEqual(Buffer.from('abcd'));
       });
     });
   });
